@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KWCI | 종합 한류 지수</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .trends-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:20px}
+    @media(max-width:860px){.trends-grid{grid-template-columns:1fr}}
+    .trend-card{background:#fff;border:1px solid #e6ebf1;border-radius:14px;padding:18px}
+    .trend-card h3{margin:0 0 10px}
+    .trend-card h3 small{color:#8a97a6;font-weight:500}
+    #historyChart{width:100%;height:320px}
+    .trend-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .trend-legend .lg{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#3a4654}
+    .trend-legend .lg i{width:12px;height:12px;border-radius:3px;display:inline-block}
+    .latest-row.mom{grid-template-columns:1fr 2fr auto}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="KWCI 홈">
+      <span class="brand-mark">K</span>
+      <span>
+        <strong>KWCI</strong>
+        <small>K-Wave Composite Index</small>
+      </span>
+    </a>
+    <nav aria-label="주요 섹션">
+      <a href="#domains">도메인</a>
+      <a href="#method">산식</a>
+      <a href="#pipeline">수집</a>
+      <a href="#dashboard">대시보드</a>
+      <a href="#trends">추이</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="overview">
+      <div class="hero-copy">
+        <p class="eyebrow">K-wave index framework · 2026</p>
+        <h1>한류를 장르가 아니라 움직이는 복합 생태계로 측정합니다.</h1>
+        <p>
+          KWCI는 경제지표(L1)·문화적 영향력(L2)·수용자 반응(L3)을 결합해 K-pop·K영상·게임·웹툰·
+          푸드·패션·뷰티·관광 8개 산업 분야의 한류 흐름을 분기 단위로 추적하는 종합 지수입니다.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#dashboard">지수 보기</a>
+          <a class="button secondary" href="#pipeline">수집 계획</a>
+        </div>
+      </div>
+      <div class="hero-panel" aria-label="지수 핵심 구조">
+        <div class="score-card map-card">
+          <div>
+            <span>Country Realtime Panel</span>
+            <strong>KWCI 78.2</strong>
+          </div>
+          <div class="mini-map" aria-hidden="true">
+            <span class="point us">US</span>
+            <span class="point br">BR</span>
+            <span class="point fr">FR</span>
+            <span class="point ae">AE</span>
+            <span class="point in">IN</span>
+            <span class="point th">TH</span>
+            <span class="point jp">JP</span>
+          </div>
+        </div>
+        <div class="layer-grid">
+          <div><b>L1</b><span>경제지표</span></div>
+          <div><b>L2</b><span>플랫폼 데이터</span></div>
+          <div><b>L3</b><span>정성 아카이브</span></div>
+        </div>
+        <div class="signal-strip" aria-label="국가별 샘플 지수">
+          <span><b>US</b><i style="--v:67%"></i></span>
+          <span><b>TH</b><i style="--v:59%"></i></span>
+          <span><b>JP</b><i style="--v:55%"></i></span>
+          <span><b>BR</b><i style="--v:49%"></i></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section intro">
+      <div>
+        <p class="eyebrow">Design Principle</p>
+        <h2>분야 × 지표 × 담론</h2>
+      </div>
+      <p>
+        이 웹페이지는 <b>Kwave_intro.docx</b>의 큰 그림을 바탕으로 한류를 콘텐츠·상품 영역,
+        수용·소비 지표, 담론·인식 지표의 매트릭스로 정리하고, <b>kwave_index_framework.pdf</b>와
+        <b>kwci_pipeline_report.pdf</b>의 실행 플랜을 따라 데이터 수집, 정규화, 가중합산, 운영체계까지 연결합니다.
+      </p>
+    </section>
+
+    <section class="section" id="domains">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Domain Sub-Index</p>
+          <h2>8개 도메인 지수</h2>
+        </div>
+        <div class="tabs" role="tablist" aria-label="도메인 선택"></div>
+      </div>
+      <div class="domain-layout">
+        <article class="domain-detail" aria-live="polite"></article>
+        <aside class="weight-panel">
+          <h3>초기 가중치</h3>
+          <div class="weight-list"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section method" id="method">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Methodology</p>
+          <h2>산출 방식</h2>
+        </div>
+      </div>
+      <div class="method-grid">
+        <article>
+          <span>Step 1</span>
+          <h3>원시 지표 정규화</h3>
+          <code>x_norm = (x_t - x_min) / (x_max - x_min) × 100</code>
+          <p>2018Q1부터 현재까지의 시계열을 0-100 구간으로 변환합니다.</p>
+        </article>
+        <article>
+          <span>Step 2</span>
+          <h3>DSI 산출</h3>
+          <code>DSI = .5L1 + .3L2 + .2L3</code>
+          <p>경제지표·플랫폼 데이터·정성 아카이브를 도메인별 서브 인덱스로 합산합니다.</p>
+        </article>
+        <article>
+          <span>Step 3</span>
+          <h3>KWCI 가중합</h3>
+          <code>KWCI = Σ(w_i × DSI_i)</code>
+          <p>8개 도메인의 가중평균으로 종합 한류 지수를 만듭니다.</p>
+        </article>
+        <article>
+          <span>Step 4</span>
+          <h3>기준연도 지수화</h3>
+          <code>KWCI_index = KWCI / KWCI_2018 × 100</code>
+          <p>분기별 지수를 기준연도 2018=100으로 해석 가능하게 만듭니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section pipeline" id="pipeline">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Data Operations</p>
+          <h2>데이터 수집 실행 플랜</h2>
+        </div>
+      </div>
+      <div class="pipeline-track">
+        <div><b>L1 경제지표</b><span>수출액, 매출, 관광수입, 시장 규모</span></div>
+        <div><b>L2 플랫폼 데이터</b><span>국가별 YouTube, Reddit, KF API, OTT·차트 지표</span></div>
+        <div><b>L3 정성 아카이브</b><span>언론, 비평, 전시·수상, 연구팀 큐레이션 기록</span></div>
+        <div><b>출력</b><span>국가 × 분기 × 도메인 패널과 KWCI 보고서</span></div>
+      </div>
+      <div class="source-grid"></div>
+    </section>
+
+    <section class="section l2-module" id="l2-module">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">L2 Realtime Module</p>
+          <h2>국가별 소셜·소비 실시간 지표</h2>
+        </div>
+      </div>
+      <div class="module-layout">
+        <article class="module-card lead">
+          <h3>KWCI 안에서의 위치</h3>
+          <p>
+            새 파이프라인은 기존 KWCI 3레이어 프레임워크를 대체하지 않고, L2 플랫폼 데이터 레이어의
+            국가별 실시간 모듈로 통합합니다. KOFICE 설문은 기준선으로 두고, YouTube·Reddit·KF API가
+            국가별 소비와 소셜 반응의 단기 변동을 보정합니다.
+          </p>
+          <code>GSI(c,g) = .40S_norm + .35Y_norm + .25R_norm</code>
+          <code>KWCI_L2(c) = Σ(w_g × GSI(c,g)) + .05K_norm(c)</code>
+        </article>
+        <article class="module-card">
+          <h3>대상 국가</h3>
+          <p>미국, 중국, 일본, 베트남, 태국, 인도네시아, 인도, 말레이시아, 프랑스, 영국, 브라질, 아르헨티나, UAE, 터키, 남아공</p>
+        </article>
+        <article class="module-card">
+          <h3>핵심 수집원</h3>
+          <ul>
+            <li>KOFICE 해외한류실태조사 CSV: 연 1회 기준값</li>
+            <li>KF 한류현황 API: 조직·팬클럽 인프라 보정</li>
+            <li>YouTube Data API: 국가별 트렌딩 K-콘텐츠 조회수</li>
+            <li>Reddit PRAW: 장르별 서브레딧 주간 언급량</li>
+          </ul>
+        </article>
+        <article class="module-card">
+          <h3>운영 주기</h3>
+          <ul>
+            <li>일별: YouTube·Reddit 수집, 정규화, L2 보정값 산출</li>
+            <li>주별: KF API 갱신과 팬덤 인프라 보정</li>
+            <li>연간: KOFICE 설문 기반 국가·장르 기준선 재설정</li>
+          </ul>
+        </article>
+      </div>
+      <div class="genre-strip" aria-label="L2 장르 가중치">
+        <span style="--w:35">K-pop 35%</span>
+        <span style="--w:30">K-drama 30%</span>
+        <span style="--w:10">K-movie 10%</span>
+        <span style="--w:12">K-beauty 12%</span>
+        <span style="--w:8">K-food 8%</span>
+        <span style="--w:5">K-culture 5%</span>
+      </div>
+    </section>
+
+    <section class="section dashboard" id="dashboard">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Prototype Dashboard</p>
+          <h2>시범 지수 보드</h2>
+        </div>
+        <label class="control">
+          <span>가중치: 경제중심(2축) 보기</span>
+          <input type="checkbox" id="diversityToggle">
+        </label>
+      </div>
+      <div class="dashboard-grid">
+        <div class="index-meter">
+          <span>현재 KWCI</span>
+          <strong id="kwciValue">0</strong>
+          <small>샘플 DSI 기반 시뮬레이션</small>
+        </div>
+        <canvas id="barChart" width="900" height="420" aria-label="도메인별 DSI 막대그래프"></canvas>
+        <div class="live-panel">
+          <h3>L2 국가별 최신 산출</h3>
+          <div id="l2Latest">아직 산출 파일을 읽지 못했습니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section trends" id="trends">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Time Series</p>
+          <h2>분기 추이 · 월간 모멘텀</h2>
+        </div>
+      </div>
+      <div class="trends-grid">
+        <div class="trend-card">
+          <h3>경제 백본 지수 추이 <small>(2018=100 · 2021Q1~)</small></h3>
+          <canvas id="historyChart" height="320" aria-label="분기별 경제 백본 지수 라인차트"></canvas>
+          <div id="historyLegend" class="trend-legend"></div>
+          <p class="muted-line" id="historyNote"></p>
+        </div>
+        <div class="trend-card">
+          <h3>월간 모멘텀 <small>(nowcast)</small></h3>
+          <div id="momentumPanel">아직 산출 파일을 읽지 못했습니다.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Source basis: Kwave_intro.docx · kwave_index_framework.pdf · kwci_pipeline_report.pdf</p>
+    <p>Built as a local prototype for data collection, research writing, and visual design.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

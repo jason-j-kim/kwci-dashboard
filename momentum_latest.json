@@ -1,0 +1,103 @@
+{
+  "period": "2026-05",
+  "type": "monthly momentum subindex (nowcast)",
+  "layers": "L1 관세청 월수출 + L3 YouTube·Google Trends (연단위·인프라 제외)",
+  "weight_profile": "two_axis_cultural",
+  "global_momentum": 29.79,
+  "countries": [
+    {
+      "country": "US",
+      "momentum": 52.5,
+      "country_name": "미국"
+    },
+    {
+      "country": "CN",
+      "momentum": 44.96,
+      "country_name": "중국"
+    },
+    {
+      "country": "MY",
+      "momentum": 41.54,
+      "country_name": "말레이시아"
+    },
+    {
+      "country": "AE",
+      "momentum": 34.91,
+      "country_name": "UAE"
+    },
+    {
+      "country": "GB",
+      "momentum": 29.56,
+      "country_name": "영국"
+    },
+    {
+      "country": "JP",
+      "momentum": 29.46,
+      "country_name": "일본"
+    },
+    {
+      "country": "TR",
+      "momentum": 25.55,
+      "country_name": "터키"
+    },
+    {
+      "country": "IN",
+      "momentum": 25.47,
+      "country_name": "인도"
+    },
+    {
+      "country": "TH",
+      "momentum": 25.27,
+      "country_name": "태국"
+    },
+    {
+      "country": "VN",
+      "momentum": 24.35,
+      "country_name": "베트남"
+    },
+    {
+      "country": "ID",
+      "momentum": 24.08,
+      "country_name": "인도네시아"
+    },
+    {
+      "country": "FR",
+      "momentum": 23.05,
+      "country_name": "프랑스"
+    },
+    {
+      "country": "ZA",
+      "momentum": 22.65,
+      "country_name": "남아공"
+    },
+    {
+      "country": "AR",
+      "momentum": 22.01,
+      "country_name": "아르헨티나"
+    },
+    {
+      "country": "BR",
+      "momentum": 21.55,
+      "country_name": "브라질"
+    }
+  ],
+  "top": [
+    {
+      "country": "US",
+      "momentum": 52.5,
+      "country_name": "미국"
+    },
+    {
+      "country": "CN",
+      "momentum": 44.96,
+      "country_name": "중국"
+    },
+    {
+      "country": "MY",
+      "momentum": 41.54,
+      "country_name": "말레이시아"
+    },
+    {
+      "country": "AE",
+      "momentum": 34.91,
+      "country_name": "UAE"
