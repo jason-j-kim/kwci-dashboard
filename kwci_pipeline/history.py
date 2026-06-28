@@ -153,7 +153,9 @@ def _customs_annual(hs_codes):
     """
     if not config.DATA_GO_KR_API_KEY or not hs_codes:
         return None
-    end_year = _current_quarter()[0]
+    # 진행 중인 올해는 부분 연도(예: 5개월치)라 1년치와 비교 불가 → 직전 완성연도까지만 사용.
+    # (이후 분기는 _idx_q_from_annual이 최신 완성연도 값으로 유지)
+    end_year = _current_quarter()[0] - 1
     out, got = {}, False
     for y in range(config.HISTORY_BASE_YEAR, end_year + 1):
         tot = 0.0
