@@ -9,7 +9,10 @@ DATA_DIR = ROOT_DIR / "data"
 RAW_DIR = DATA_DIR / "raw"
 OUTPUT_DIR = DATA_DIR / "output"
 
-YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "").strip()
+_YT_RAW = os.getenv("YOUTUBE_API_KEY", "")
+# 쉼표로 여러 키 등록 가능. 한도(403 quotaExceeded) 시 다음 키로 자동 회전.
+YOUTUBE_API_KEYS = [k.strip() for k in _YT_RAW.split(",") if k.strip()]
+YOUTUBE_API_KEY = YOUTUBE_API_KEYS[0] if YOUTUBE_API_KEYS else ""
 REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID", "").strip()
 REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET", "").strip()
 DATA_GO_KR_API_KEY = os.getenv("DATA_GO_KR_API_KEY", "").strip()

@@ -44,6 +44,31 @@ def _text_matches_genre(text: str, genre: str) -> bool:
     return any(keyword in lower for keyword in config.GENRE_KEYWORDS[genre])
 
 
+_yt_idx = 0  # 현재 사용 중인 YouTube 키 인덱스
+
+
+def _yt_get(url: str, params: dict):
+    """YouTube GET — 한도 초과(403 quotaExceeded) 시 다음 키로 자동 회전."""
+    global _yt_idx
+    keys = config.YOUTUBE_API_KEYS or ([config.YOUTUBE_API_KEY] if config.YOUTUBE_API_KEY else [])
+    if not keys:
+        return requests.get(url, params=params, timeout=30)
+    last = None
+    for _ in range(len(keys)):
+        last = requests.get(url, params={**params, "key": keys[_yt_idx]}, timeout=30)
+        if last.status_code == 403:
+            reason = ""
+            try:
+                reason = last.json()["error"]["errors"][0].get("reason", "")
+            except Exception:  # noqa: BLE001
+                pass
+            if reason in ("quotaExceeded", "dailyLimitExceeded", "rateLimitExceeded"):
+                _yt_idx = (_yt_idx + 1) % len(keys)
+                continue
+        return last
+    return last
+
+
 def collect_youtube_metrics(sample: bool = False) -> pd.DataFrame:
     if sample or not config.YOUTUBE_API_KEY:
         return _sample_youtube_metrics()
@@ -56,9 +81,8 @@ def collect_youtube_metrics(sample: bool = False) -> pd.DataFrame:
             "chart": "mostPopular",
             "regionCode": country,
             "maxResults": 50,
-            "key": config.YOUTUBE_API_KEY,
         }
-        response = requests.get(videos_endpoint, params=params, timeout=30)
+        response = _yt_get(videos_endpoint, params)
         if response.status_code >= 400:
             for genre in config.GENRE_WEIGHTS:
                 rows.append(
@@ -119,9 +143,8 @@ def _collect_youtube_search_metric(country: str, genre: str) -> dict[str, int | 
         "type": "video",
         "regionCode": country,
         "maxResults": config.YOUTUBE_SEARCH_MAX_RESULTS,
-        "key": config.YOUTUBE_API_KEY,
     }
-    search_response = requests.get(search_endpoint, params=search_params, timeout=30)
+    search_response = _yt_get(search_endpoint, search_params)
     if search_response.status_code >= 400:
         return {"youtube_views": 0, "youtube_matched_videos": 0, "youtube_error": f"search_http_{search_response.status_code}"}
     video_ids = [
@@ -132,14 +155,9 @@ def _collect_youtube_search_metric(country: str, genre: str) -> dict[str, int | 
     if not video_ids:
         return {"youtube_views": 0, "youtube_matched_videos": 0, "youtube_error": ""}
 
-    stats_response = requests.get(
+    stats_response = _yt_get(
         videos_endpoint,
-        params={
-            "part": "statistics",
-            "id": ",".join(video_ids),
-            "key": config.YOUTUBE_API_KEY,
-        },
-        timeout=30,
+        {"part": "statistics", "id": ",".join(video_ids)},
     )
     if stats_response.status_code >= 400:
         return {"youtube_views": 0, "youtube_matched_videos": 0, "youtube_error": f"stats_http_{stats_response.status_code}"}
