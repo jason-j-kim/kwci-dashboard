@@ -149,40 +149,45 @@
     <section class="section l2-module" id="l2-module">
       <div class="section-head">
         <div>
-          <p class="eyebrow">L2 Realtime Module</p>
-          <h2>국가별 소셜·소비 실시간 지표</h2>
+          <p class="eyebrow">Realtime Module</p>
+          <h2>국가별 실시간 보정 모듈</h2>
         </div>
       </div>
       <div class="module-layout">
         <article class="module-card lead">
           <h3>KWCI 안에서의 위치</h3>
           <p>
-            새 파이프라인은 기존 KWCI 3레이어 프레임워크를 대체하지 않고, L2 플랫폼 데이터 레이어의
-            국가별 실시간 모듈로 통합합니다. KOFICE 설문은 기준선으로 두고, YouTube·Google Trends·KF API가
-            국가별 소비와 소셜 반응의 단기 변동을 보정합니다.
+            분기 단위 8도메인 DSI(본지수) 위에 얹는 국가별 실시간 보정 장치입니다. KOFICE 해외한류실태조사를
+            연 1회 기준선으로 두고, YouTube·Google Trends가 수용자(L3) 신호의 단기 변동을, KF 한류현황 API가
+            팬덤 인프라를 보정합니다. 본지수의 분기 구조를 대체하지 않는 보조 신호입니다.
           </p>
-          <code>GSI(c,g) = .40S_norm + .35Y_norm + .25T_norm</code>
-          <code>KWCI_L2(c) = Σ(w_g × GSI(c,g)) + .05K_norm(c)</code>
+          <code>GSI(c,d) = .40·S_norm + .35·Y_norm + .25·T_norm</code>
+          <code>Module(c) = Σ(w_d · GSI(c,d)) + .05·KF_norm(c)</code>
+          <p class="muted-line">S=KOFICE 설문, Y=YouTube, T=Google Trends, KF=팬덤 인프라. L3 하위가중 0.40/0.35/0.25이며, 도메인 가중 w_d는 본지수와 동일한 8도메인 프로파일(현재 문화중심)을 사용합니다.</p>
         </article>
         <article class="module-card">
-          <h3>대상 국가</h3>
+          <h3>대상 국가 (15)</h3>
           <p>미국, 중국, 일본, 베트남, 태국, 인도네시아, 인도, 말레이시아, 프랑스, 영국, 브라질, 아르헨티나, UAE, 터키, 남아공</p>
+        </article>
+        <article class="module-card">
+          <h3>8개 도메인</h3>
+          <p>K-pop · K영상 · K게임 · K웹툰 · K푸드 · K뷰티 · K패션 · K관광 — 본지수와 동일 단위(구 6장르 체계 폐지).</p>
         </article>
         <article class="module-card">
           <h3>핵심 수집원</h3>
           <ul>
-            <li>KOFICE 해외한류실태조사 CSV: 연 1회 기준값</li>
+            <li>KOFICE 해외한류실태조사: 연 1회 국가·도메인 기준선</li>
             <li>KF 한류현황 API: 조직·팬클럽 인프라 보정</li>
-            <li>YouTube Data API: 국가별 트렌딩 K-콘텐츠 조회수</li>
+            <li>YouTube Data API: 국가별 K-콘텐츠 조회수</li>
             <li>Google Trends(pytrends): 분야별 국가 검색 관심도</li>
           </ul>
         </article>
         <article class="module-card">
           <h3>운영 주기</h3>
           <ul>
-            <li>일별: YouTube·Google Trends 수집, 정규화, L2 보정값 산출</li>
+            <li>일별: YouTube·Google Trends 수집·정규화·보정값 산출</li>
             <li>주별: KF API 갱신과 팬덤 인프라 보정</li>
-            <li>연간: KOFICE 설문 기반 국가·장르 기준선 재설정</li>
+            <li>연간: KOFICE 설문 기반 국가·도메인 기준선 재설정</li>
           </ul>
         </article>
       </div>
