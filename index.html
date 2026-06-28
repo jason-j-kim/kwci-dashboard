@@ -288,6 +288,34 @@
   <script>
   (async function(){
     const cb = '?cb=' + Date.now();
+    function lineChart(cv, vals, labels){
+      if(!cv || !vals.length) return;
+      const dpr = window.devicePixelRatio || 1, w = cv.clientWidth || 320, h = cv.clientHeight || 150;
+      cv.width = w*dpr; cv.height = h*dpr; const x = cv.getContext('2d'); x.scale(dpr,dpr);
+      const pad = {l:32,r:12,t:12,b:18};
+      const mn = Math.min(100, ...vals), mx = Math.max(100, ...vals);
+      const X = i => pad.l + (w-pad.l-pad.r) * (i/((vals.length-1)||1));
+      const Y = v => pad.t + (h-pad.t-pad.b) * (1 - (v-mn)/((mx-mn)||1));
+      x.strokeStyle='#e2e8f0'; x.lineWidth=1; x.beginPath(); x.moveTo(pad.l, Y(100)); x.lineTo(w-pad.r, Y(100)); x.stroke();
+      x.fillStyle='#94a3b8'; x.font='10px sans-serif'; x.fillText('100', 4, Y(100)+3);
+      x.strokeStyle='#2563eb'; x.lineWidth=2; x.beginPath();
+      vals.forEach((v,i)=>{ i ? x.lineTo(X(i),Y(v)) : x.moveTo(X(i),Y(v)); }); x.stroke();
+      const li = vals.length-1; x.fillStyle='#2563eb'; x.beginPath(); x.arc(X(li),Y(vals[li]),3,0,Math.PI*2); x.fill();
+      x.fillStyle='#94a3b8'; x.font='10px sans-serif';
+      if(labels.length){ x.fillText(labels[0], pad.l, h-4); const ll=labels[labels.length-1]; x.fillText(ll, w-pad.r-x.measureText(ll).width, h-4); }
+    }
+    function barChart(cv, items){
+      if(!cv || !items.length) return;
+      const dpr = window.devicePixelRatio || 1, w = cv.clientWidth || 320, h = cv.clientHeight || 170;
+      cv.width = w*dpr; cv.height = h*dpr; const x = cv.getContext('2d'); x.scale(dpr,dpr);
+      const mx = Math.max(...items.map(d=>d.v)) || 1, bh = (h-6)/items.length, lw = 44;
+      items.forEach((d,i)=>{
+        const y = 3 + i*bh, bw = (w-lw-30) * (d.v/mx);
+        x.fillStyle='#475569'; x.font='11px sans-serif'; x.textBaseline='middle'; x.fillText(d.name, 0, y+bh/2);
+        x.fillStyle='#3b82f6'; x.fillRect(lw, y+2, bw, bh-6);
+        x.fillStyle='#1e293b'; x.fillText(d.v.toFixed(1), lw+bw+4, y+bh/2);
+      });
+    }
     try {
       const h = await (await fetch('history.json' + cb)).json();
       const td = h.tourism_diversification || [], q = h.quarters || [];
@@ -300,8 +328,10 @@
         }).join('');
         el.innerHTML = '<div style="font-size:34px;font-weight:800;color:#2563eb">' + last + '</div>'
           + '<div style="color:#64748b;font-size:12px">' + (q.length ? q[q.length-1] : '') + ' · 2018=100 (시작 ' + first + ')</div>'
-          + '<table style="width:100%;margin-top:10px;font-size:12px;border-collapse:collapse">'
+          + '<canvas id="tourDivChart" style="width:100%;height:150px;display:block;margin:8px 0"></canvas>'
+          + '<table style="width:100%;font-size:12px;border-collapse:collapse">'
           + '<tr style="color:#64748b"><th style="text-align:left">연도</th><th style="text-align:right">중국 비중</th></tr>' + rows + '</table>';
+        lineChart(document.getElementById('tourDivChart'), td, q);
       } else { el.textContent = '관광 다변화 데이터 없음'; }
     } catch (e) { var t = document.getElementById('tourDivPanel'); if (t) t.textContent = '로드 실패'; }
     try {
@@ -310,15 +340,18 @@
       const names = (k.domains || []).reduce(function(m,d){ m[d.genre] = d.genre_name; return m; }, {});
       const order = ['kpop','kvideo','kgame','kwebtoon','kfood','kbeauty','kfashion','ktourism'];
       const el = document.getElementById('audDivPanel');
-      const rows = order.filter(function(g){ return ad[g] && ad[g].enm != null; }).map(function(g){
+      const list = order.filter(function(g){ return ad[g] && ad[g].enm != null; });
+      const rows = list.map(function(g){
         const d = ad[g];
         const yt = (d.youtube_enm != null) ? d.youtube_enm : '-';
         return '<tr><td>' + (names[g] || g) + '</td><td style="text-align:right">' + d.enm + '</td><td style="text-align:right">' + d.enm_pct + '%</td><td>' + d.top_country + ' ' + d.top_share_pct + '%</td><td style="text-align:right;color:#94a3b8">' + yt + '</td></tr>';
       }).join('');
-      el.innerHTML = rows
-        ? '<table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="color:#64748b"><th style="text-align:left">분야</th><th style="text-align:right">ENM</th><th style="text-align:right">최대대비</th><th style="text-align:left">최다 관심국(KOFICE)</th><th style="text-align:right">YT참고</th></tr>' + rows + '</table>'
+      el.innerHTML = list.length
+        ? '<canvas id="audDivChart" style="width:100%;height:175px;display:block;margin-bottom:8px"></canvas>'
+        + '<table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="color:#64748b"><th style="text-align:left">분야</th><th style="text-align:right">ENM</th><th style="text-align:right">최대대비</th><th style="text-align:left">최다 관심국(KOFICE)</th><th style="text-align:right">YT참고</th></tr>' + rows + '</table>'
         + '<div style="font-size:11px;color:#94a3b8;margin-top:6px">ENM·최다 관심국 = KOFICE 설문(안정) 기준. YT참고 = YouTube 단면 ENM(노이즈, 비교용).</div>'
         : '수용 다변화 데이터 없음(다음 자동수집 후 표시).';
+      if (list.length) barChart(document.getElementById('audDivChart'), list.map(function(g){ return {name:(names[g]||g), v:ad[g].enm}; }));
     } catch (e) { var a = document.getElementById('audDivPanel'); if (a) a.textContent = '로드 실패'; }
   })();
   </script>
