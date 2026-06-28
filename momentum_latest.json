@@ -3,108 +3,108 @@
   "type": "monthly momentum subindex (nowcast)",
   "layers": "L1 관세청 월수출 + L3 YouTube·Google Trends (연단위·인프라 제외)",
   "weight_profile": "two_axis_cultural",
-  "global_momentum": 22.57,
+  "global_momentum": 24.26,
   "countries": [
     {
       "country": "MY",
-      "momentum": 48.85,
+      "momentum": 50.7,
       "country_name": "말레이시아"
     },
     {
       "country": "US",
-      "momentum": 47.41,
+      "momentum": 49.38,
       "country_name": "미국"
     },
     {
       "country": "AE",
-      "momentum": 27.84,
+      "momentum": 29.66,
       "country_name": "UAE"
     },
     {
       "country": "CN",
-      "momentum": 25.84,
+      "momentum": 28.92,
       "country_name": "중국"
     },
     {
       "country": "JP",
-      "momentum": 24.96,
+      "momentum": 26.83,
       "country_name": "일본"
     },
     {
       "country": "GB",
-      "momentum": 23.52,
+      "momentum": 25.38,
       "country_name": "영국"
     },
     {
       "country": "VN",
-      "momentum": 19.99,
+      "momentum": 21.82,
       "country_name": "베트남"
     },
     {
-      "country": "FR",
-      "momentum": 17.25,
-      "country_name": "프랑스"
-    },
-    {
       "country": "AR",
-      "momentum": 17.24,
+      "momentum": 19.11,
       "country_name": "아르헨티나"
     },
     {
+      "country": "FR",
+      "momentum": 19.09,
+      "country_name": "프랑스"
+    },
+    {
       "country": "ID",
-      "momentum": 16.88,
+      "momentum": 18.73,
       "country_name": "인도네시아"
     },
     {
-      "country": "ZA",
-      "momentum": 16.2,
-      "country_name": "남아공"
-    },
-    {
       "country": "TR",
-      "momentum": 15.6,
+      "momentum": 17.45,
       "country_name": "터키"
     },
     {
       "country": "IN",
-      "momentum": 13.9,
+      "momentum": 15.76,
       "country_name": "인도"
     },
     {
       "country": "TH",
-      "momentum": 13.5,
+      "momentum": 15.35,
       "country_name": "태국"
     },
     {
+      "country": "ZA",
+      "momentum": 14.35,
+      "country_name": "남아공"
+    },
+    {
       "country": "BR",
-      "momentum": 9.55,
+      "momentum": 11.39,
       "country_name": "브라질"
     }
   ],
   "top": [
     {
       "country": "MY",
-      "momentum": 48.85,
+      "momentum": 50.7,
       "country_name": "말레이시아"
     },
     {
       "country": "US",
-      "momentum": 47.41,
+      "momentum": 49.38,
       "country_name": "미국"
     },
     {
       "country": "AE",
-      "momentum": 27.84,
+      "momentum": 29.66,
       "country_name": "UAE"
     },
     {
       "country": "CN",
-      "momentum": 25.84,
+      "momentum": 28.92,
       "country_name": "중국"
     },
     {
       "country": "JP",
-      "momentum": 24.96,
+      "momentum": 26.83,
       "country_name": "일본"
     }
   ]
