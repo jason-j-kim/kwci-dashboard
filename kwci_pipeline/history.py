@@ -53,17 +53,32 @@ REAL_ANNUAL_INDEX = {
     "kfood":    {2018: 100, 2019: 108, 2020: 117, 2021: 132, 2022: 136, 2023: 139, 2024: 154},
     "kbeauty":  {2018: 100, 2019: 104, 2020: 121, 2021: 146, 2022: 127, 2023: 135, 2024: 162},
     "kfashion": {2018: 100, 2019: 98,  2020: 87,  2021: 100, 2022: 108, 2023: 104, 2024: 105},
-    "ktourism": {2018: 100, 2019: 114, 2020: 16,  2021: 6,   2022: 21,  2023: 72,  2024: 107},
+    "ktourism": {2018: 100, 2019: 114, 2020: 16,  2021: 6,   2022: 21,  2023: 72,  2024: 107, 2025: 122},
 }
-REAL_LAST_YEAR = 2024  # 이후 연도는 최신 확정치 유지(보수적)
+REAL_LAST_YEAR = 2025  # 분야별로 자체 최신연도를 쓰며, 시계열 표시는 2025까지 캡
+
+# ── 관광 source-market 국적별 비중(%) — 다각화 지수용(관광공사/KTO 국적별 외래객) ──
+# 상위 시장 비중. 사드(2017) 이후 중국 집중 완화 → 일본·미국·대만 등으로 다변화.
+# 비중 합이 100 미만인 잔여는 'others'로 처리. 출처: 한국관광공사 국적별 방한통계.
+TOURISM_SHARES = {
+    2018: {"CN": 31.2, "JP": 19.2, "TW": 7.3, "US": 6.8, "HK": 4.0, "others": 31.5},
+    2019: {"CN": 34.4, "JP": 18.7, "TW": 7.2, "US": 6.2, "HK": 4.0, "others": 29.5},
+    2022: {"CN": 7.6,  "JP": 9.7,  "TW": 6.8, "US": 17.4, "HK": 2.5, "others": 56.0},
+    2023: {"CN": 18.6, "JP": 21.7, "TW": 11.7, "US": 9.0, "HK": 4.4, "others": 34.6},
+    2024: {"CN": 28.1, "JP": 19.7, "TW": 9.0, "US": 8.1, "HK": 3.5, "others": 31.6},
+    2025: {"CN": 25.0, "JP": 19.0, "TW": 9.5, "US": 8.5, "HK": 3.5, "others": 34.5},
+}
 
 
 def _real_idx_q(genre: str, year: int, q: int) -> float:
-    """실측 연간지수 → 분기지수. 연간값을 분기 중앙에 배치해 선형보간, 확정연도 이후는 유지."""
+    """실측 연간지수 → 분기지수. 연간값을 분기 중앙에 배치해 선형보간. 분야별 자체 최신연도까지 사용."""
     a = REAL_ANNUAL_INDEX[genre]
+    last, first = max(a), min(a)
 
     def av(yr):
-        return a[yr] if yr <= REAL_LAST_YEAR else a[REAL_LAST_YEAR]
+        if yr in a:
+            return a[yr]
+        return a[last] if yr > last else a[first]
 
     lo = av(year)
     hi = av(year + 1)
@@ -221,7 +236,7 @@ def _kto_quarterly(qs: list):
 
 def build_history(sample: bool = False):
     base = config.HISTORY_BASE_YEAR
-    qs = quarters(base)
+    qs = [q for q in quarters(base) if q <= (2025, 4)]  # 연간비교는 최신 완성연도(2025)까지로 캡
     genres = list(config.GENRE_WEIGHTS)
 
     # 콘텐츠 4분야(K-pop·K영상·게임·웹툰)는 KOSIS 콘텐츠산업조사 연간 수출(2018~)을
@@ -242,16 +257,9 @@ def build_history(sample: bool = False):
         else:
             idx[g] = {qq: _real_idx_q(g, qq[0], qq[1]) for qq in qs}
             sources[g] = "stat(verified-fixed)"
-    # 관광은 KTO 출입국관광통계(월별 방한 외래객, 2018~)로 2018=100 지수화 — API 자동화.
-    # KTO 키 없거나 2018 베이스 결측이면 검증고정값 유지(폴백).
-    if not sample:
-        kto = _kto_quarterly(qs)
-        if kto:
-            bvals = [kto[(base, q)] for q in (1, 2, 3, 4) if (base, q) in kto and kto[(base, q)] > 0.01]
-            bavg = (sum(bvals) / len(bvals)) if bvals else 0.0
-            if bavg > 0:
-                idx["ktourism"] = {qq: round(kto.get(qq, 0.0) / bavg * 100, 1) for qq in qs}
-                sources["ktourism"] = "kto(real)"
+    # 관광: KTO 월별 REST가 2018년을 제공하지 않아(run #4 폴백 확인) 라이브 자동화 불가.
+    # 한국관광공사 공식 연간 외래객(2018–2025) 공표통계를 권위 소스로 사용(_real_idx_q).
+    sources["ktourism"] = "kto(official-annual 2018-2025)"
 
     # 푸드·패션·뷰티는 관세청 무역통계(전국 연간 수출)로 2018=100 지수화 — API 자동화.
     # 푸드=가공식품(라면·김치 등) HS, 패션=의류 HS, 뷰티=화장품 HS. 실패 시 검증고정 유지.
@@ -268,6 +276,20 @@ def build_history(sample: bool = False):
     weights = processor.active_weights()
     composite = {qq: round(sum(weights[g] * idx[g][qq] for g in genres), 1) for qq in qs}
 
+    # 관광 source-market 다각화 지수(2018=100): 명명 상위시장 비중으로 유효시장수 ENM=1/HHI 산출.
+    # 중국 집중 완화·시장 다변화 시 상승. 볼륨 지수와 분리된 별도 항목(관광 회복의 질·복원력).
+    def _enm(shares):
+        named = {k: v for k, v in shares.items() if k != "others"}
+        tot = sum(named.values()) or 1.0
+        fr = [v / tot for v in named.values()]
+        hhi = sum(f * f for f in fr) or 1.0
+        return 1.0 / hhi
+
+    div_ann = {y: _enm(s) for y, s in TOURISM_SHARES.items()}
+    div_base = div_ann.get(base) or div_ann[min(div_ann)]
+    div_aidx = {y: div_ann[y] / div_base * 100 for y in div_ann}
+    div_series = {qq: _idx_q_from_annual(div_aidx, qq[0], qq[1]) for qq in qs}
+
     def label(yq):
         return f"{yq[0]}Q{yq[1]}"
 
@@ -279,17 +301,20 @@ def build_history(sample: bool = False):
         "weight_profile": config.ACTIVE_WEIGHT_PROFILE,
         "sources": sources,
         "real_domains": real_n,
-        "note": f"2018=100 분기지수. 전 8분야 공공 API 실측 우선: 콘텐츠 4분야(K-pop·K영상·게임·웹툰)=KOSIS 콘텐츠산업조사 수출 {sum(1 for s in sources.values() if s == 'kosis(real)')}/4, 관광=KTO 출입국통계, 푸드·패션·뷰티=관세청 무역통계(가공식품·의류·화장품 HS). API 결측 분야는 검증 통계로 폴백. 분기 선형보간, 최신 확정연도 이후 유지.",
+        "note": f"2018=100 분기지수(2018–2025 캡). 공공 통계 기반: 콘텐츠 4분야(K-pop·K영상·게임·웹툰)=KOSIS 콘텐츠산업조사 수출 {sum(1 for s in sources.values() if s == 'kosis(real)')}/4 라이브, 푸드·패션·뷰티=관세청 무역통계(가공식품·의류·화장품 HS) 라이브, 관광=한국관광공사 공식 연간 외래객(2018–2025). 라이브 결측은 검증 통계로 폴백. 분기 선형보간, 최신연도 이후 유지.",
         "notes": {
             "kwebtoon": "K웹툰 L1은 KOSIS '만화 수출' 기준. 콘텐츠산업조사의 만화산업은 출판만화+온라인만화(웹툰)를 포함하며, 2020년부터 웹툰이 매출의 과반·수출을 주도(종이 만화 아님). 2018년 수출 베이스가 작아 증가 배수가 크게 보이는 저(低)베이스 효과 유의. 웹툰 '산업 매출'(2024년 2.29조원, 4.9배)은 내수 포함이라 별도 지표로 해석.",
             "kfood": "K푸드 L1은 관세청 가공식품(라면·김치·소스·조미김 등) 수출 기준. 농식품 총수출(곡물·축산 등 포함)이 아니라 한류 식품 신호에 맞춘 가공식품 위주이므로 총수출보다 증가율이 높을 수 있음.",
-            "ktourism": "K관광 L1은 KTO 출입국관광통계(방한 외래객). 2020–21 코로나 급감·이후 회복 반영.",
-            "vintage": "최신 확정 연간은 2024년(2025년 통계 미발표). 2025년은 2024 확정치로 보수적 유지(참고: 2025 상반기 만화·웹툰 수출 전년동기비 약 -15%).",
+            "ktourism": "K관광 L1은 한국관광공사 공식 연간 방한 외래객(2018→2025: 1,535만→약 1,870만). KTO 월별 REST는 2018을 제공하지 않아 공표 연간통계를 권위 소스로 사용. 2020–21 코로나 급감·이후 회복.",
+            "tourism_diversification": "방한 외래객의 source-market 다각화 지수(2018=100). 상위 명명시장(중국·일본·대만·미국·홍콩) 비중으로 유효시장수 ENM=1/HHI를 산출해 지수화. 값이 높을수록 특정국(특히 중국) 의존이 낮아 시장구성이 다변화·복원력↑. 관광 '볼륨'과 분리한 '질' 지표.",
+            "vintage": "연간비교 2025년까지 캡(2026 부분연도 제외). 콘텐츠(KOSIS)는 최신 확정연도 이후 동일값 유지.",
         },
         "quarters": [label(q) for q in disp],
         "composite": [composite[q] for q in disp],
         "domains": {g: [idx[g][q] for q in disp] for g in genres},
         "domain_names": {g: config.GENRE_NAMES_KO[g] for g in genres},
+        "tourism_diversification": [div_series[q] for q in disp],
+        "tourism_shares": TOURISM_SHARES,
     }
 
 
