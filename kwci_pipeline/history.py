@@ -25,9 +25,9 @@ import requests
 
 if __package__ in (None, ""):
     sys.path.append(str(Path(__file__).resolve().parents[1]))
-    from kwci_pipeline import config, processor
+    from kwci_pipeline import config, processor, collectors
 else:
-    from . import config, processor
+    from . import config, processor, collectors
 
 GROWTH = {"kpop": 0.08, "kvideo": 0.12, "kgame": 0.06, "kwebtoon": 0.20,
           "kfood": 0.09, "kbeauty": 0.11, "kfashion": 0.04, "ktourism": 0.10}
@@ -145,6 +145,32 @@ def _kosis_annual():
     return out or None
 
 
+def _customs_annual(hs_codes):
+    """관세청 무역통계 → 분야별 전국 연간 수출액(2018~). HS 코드 합, 연 단위.
+
+    뷰티(화장품 HS)·패션(의류 HS)·푸드(K-food 가공식품 HS)의 공식 무역통계 기반.
+    키 없거나 응답 결측이면 None(→ 검증고정 폴백).
+    """
+    if not config.DATA_GO_KR_API_KEY or not hs_codes:
+        return None
+    end_year = _current_quarter()[0]
+    out, got = {}, False
+    for y in range(config.HISTORY_BASE_YEAR, end_year + 1):
+        tot = 0.0
+        for hs in hs_codes:
+            try:
+                r = requests.get(config.CUSTOMS_EXPORT_URL, params={
+                    "serviceKey": config.DATA_GO_KR_API_KEY,
+                    "strtYymm": f"{y}01", "endYymm": f"{y}12", "hsSgn": hs}, timeout=40)
+                tot += collectors._parse_customs_expdlr(r.text)
+            except Exception:  # noqa: BLE001
+                continue
+        if tot > 0:
+            out[y] = tot
+            got = True
+    return out if got else None
+
+
 def interp_annual_to_quarterly(annual: dict, qs: list) -> dict:
     """연간값 → 분기값. 연도 내 다음 연도로 선형 램프, 데이터 밖은 CAGR 외삽."""
     yrs = sorted(annual)
@@ -225,6 +251,18 @@ def build_history(sample: bool = False):
                 idx["ktourism"] = {qq: round(kto.get(qq, 0.0) / bavg * 100, 1) for qq in qs}
                 sources["ktourism"] = "kto(real)"
 
+    # 푸드·패션·뷰티는 관세청 무역통계(전국 연간 수출)로 2018=100 지수화 — API 자동화.
+    # 푸드=가공식품(라면·김치 등) HS, 패션=의류 HS, 뷰티=화장품 HS. 실패 시 검증고정 유지.
+    if not sample:
+        for g in ("kfood", "kfashion", "kbeauty"):
+            ann = _customs_annual(config.CUSTOMS_HS_CODES.get(g))
+            yrs = sorted(y for y in (ann or {}) if y >= config.HISTORY_BASE_YEAR)
+            if ann and len(yrs) >= 2 and ann.get(config.HISTORY_BASE_YEAR):
+                base_v = ann[config.HISTORY_BASE_YEAR]
+                aidx = {y: ann[y] / base_v * 100 for y in ann if ann[y]}
+                idx[g] = {qq: _idx_q_from_annual(aidx, qq[0], qq[1]) for qq in qs}
+                sources[g] = "customs(real)"
+
     weights = processor.active_weights()
     composite = {qq: round(sum(weights[g] * idx[g][qq] for g in genres), 1) for qq in qs}
 
@@ -239,9 +277,10 @@ def build_history(sample: bool = False):
         "weight_profile": config.ACTIVE_WEIGHT_PROFILE,
         "sources": sources,
         "real_domains": real_n,
-        "note": f"2018=100 분기지수. 콘텐츠 4분야(K-pop·K영상·게임·웹툰)는 KOSIS 콘텐츠산업조사 연간 수출 실측 {sum(1 for s in sources.values() if s == 'kosis(real)')}/4 연결, 관광은 KTO 출입국통계, 푸드·패션·뷰티는 검증 통계 고정값(농식품부·식약처). 분기 선형보간, 최신 확정연도 이후 유지.",
+        "note": f"2018=100 분기지수. 전 8분야 공공 API 실측 우선: 콘텐츠 4분야(K-pop·K영상·게임·웹툰)=KOSIS 콘텐츠산업조사 수출 {sum(1 for s in sources.values() if s == 'kosis(real)')}/4, 관광=KTO 출입국통계, 푸드·패션·뷰티=관세청 무역통계(가공식품·의류·화장품 HS). API 결측 분야는 검증 통계로 폴백. 분기 선형보간, 최신 확정연도 이후 유지.",
         "notes": {
             "kwebtoon": "K웹툰 L1은 KOSIS '만화 수출' 기준. 콘텐츠산업조사의 만화산업은 출판만화+온라인만화(웹툰)를 포함하며, 2020년부터 웹툰이 매출의 과반·수출을 주도(종이 만화 아님). 2018년 수출 베이스가 작아 증가 배수가 크게 보이는 저(低)베이스 효과 유의. 웹툰 '산업 매출'(2024년 2.29조원, 4.9배)은 내수 포함이라 별도 지표로 해석.",
+            "kfood": "K푸드 L1은 관세청 가공식품(라면·김치·소스·조미김 등) 수출 기준. 농식품 총수출(곡물·축산 등 포함)이 아니라 한류 식품 신호에 맞춘 가공식품 위주이므로 총수출보다 증가율이 높을 수 있음.",
             "ktourism": "K관광 L1은 KTO 출입국관광통계(방한 외래객). 2020–21 코로나 급감·이후 회복 반영.",
             "vintage": "최신 확정 연간은 2024년(2025년 통계 미발표). 2025년은 2024 확정치로 보수적 유지(참고: 2025 상반기 만화·웹툰 수출 전년동기비 약 -15%).",
         },
