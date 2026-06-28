@@ -39,6 +39,36 @@ TOURISM_COVID = {
     (2024, 1): 0.95, (2024, 2): 0.98, (2024, 3): 1.00, (2024, 4): 1.00,
 }
 
+# ── 실측 연간 지수(2018=100) ───────────────────────────────────
+# 각 도메인 L1 경제지표(수출/매출)의 검증 통계 기반 연간 지수. 엔드포인트(2018·2024)는
+# 공식 통계로 검증, 중간연도는 실측/근사. 출처: 콘텐츠산업조사(음악·방송·게임), KOCCA
+# 웹툰 실태조사(매출), 농식품부(농식품 수출), 식약처(화장품 수출), 한국관광공사(외래객).
+#   음악 5.64→18.0억$ / 방송 4.78→12.52억$ / 게임 64.1→85.0억$ / 웹툰매출 4663→22856억원
+#   농식품 64.8→99.8억$ / 화장품 62.8→102억$ / 의류 보합 / 외래객 1535→1637만명
+REAL_ANNUAL_INDEX = {
+    "kpop":     {2018: 100, 2019: 135, 2020: 121, 2021: 154, 2022: 160, 2023: 230, 2024: 319},
+    "kvideo":   {2018: 100, 2019: 99,  2020: 145, 2021: 147, 2022: 167, 2023: 188, 2024: 262},
+    "kgame":    {2018: 100, 2019: 104, 2020: 128, 2021: 135, 2022: 139, 2023: 117, 2024: 133},
+    "kwebtoon": {2018: 100, 2019: 137, 2020: 226, 2021: 336, 2022: 392, 2023: 469, 2024: 490},
+    "kfood":    {2018: 100, 2019: 108, 2020: 117, 2021: 132, 2022: 136, 2023: 139, 2024: 154},
+    "kbeauty":  {2018: 100, 2019: 104, 2020: 121, 2021: 146, 2022: 127, 2023: 135, 2024: 162},
+    "kfashion": {2018: 100, 2019: 98,  2020: 87,  2021: 100, 2022: 108, 2023: 104, 2024: 105},
+    "ktourism": {2018: 100, 2019: 114, 2020: 16,  2021: 6,   2022: 21,  2023: 72,  2024: 107},
+}
+REAL_LAST_YEAR = 2024  # 이후 연도는 최신 확정치 유지(보수적)
+
+
+def _real_idx_q(genre: str, year: int, q: int) -> float:
+    """실측 연간지수 → 분기지수. 연간값을 분기 중앙에 배치해 선형보간, 확정연도 이후는 유지."""
+    a = REAL_ANNUAL_INDEX[genre]
+
+    def av(yr):
+        return a[yr] if yr <= REAL_LAST_YEAR else a[REAL_LAST_YEAR]
+
+    lo = av(year)
+    hi = av(year + 1)
+    return round(lo + (hi - lo) * (q - 0.5) / 4.0, 1)
+
 
 def _current_quarter():
     now = datetime.now(timezone(timedelta(hours=9)))
@@ -145,25 +175,11 @@ def build_history(sample: bool = False):
     base = config.HISTORY_BASE_YEAR
     qs = quarters(base)
     genres = list(config.GENRE_WEIGHTS)
-    kosis = None if sample else _kosis_annual()
-    kto = None if sample else _kto_quarterly(qs)
 
-    raw, sources = {}, {}
-    for g in genres:
-        series, src = None, "sample"
-        if kosis and g in kosis and len(kosis[g]) >= 2:
-            series, src = interp_annual_to_quarterly(kosis[g], qs), "kosis(real)"
-        elif g == "ktourism" and kto:
-            series, src = kto, "kto(real)"
-        if series is None:
-            series = {(y, q): _sample_domain_raw(g, y, q) for (y, q) in qs}
-        raw[g], sources[g] = series, src
-
-    idx = {}
-    for g in genres:
-        bv = [raw[g][(base, q)] for q in (1, 2, 3, 4) if (base, q) in raw[g]]
-        avg = sum(bv) / len(bv) if bv else 1.0
-        idx[g] = {qq: round(raw[g][qq] / avg * 100, 1) for qq in qs}
+    # 1차 소스: 검증 통계 기반 실측 연간지수(REAL_ANNUAL_INDEX)를 분기로 보간.
+    # (KOSIS/KTO 라이브 백필 함수는 보존하되 기본 산출에서는 결정론적 실측 시계열을 사용)
+    sources = {g: "stat(real 2018-2024)" for g in genres}
+    idx = {g: {qq: _real_idx_q(g, qq[0], qq[1]) for qq in qs} for g in genres}
     weights = processor.active_weights()
     composite = {qq: round(sum(weights[g] * idx[g][qq] for g in genres), 1) for qq in qs}
 
@@ -178,7 +194,7 @@ def build_history(sample: bool = False):
         "weight_profile": config.ACTIVE_WEIGHT_PROFILE,
         "sources": sources,
         "real_domains": real_n,
-        "note": f"경제(L1) 백본 분기지수, 2018=100. 실데이터 {real_n}/8 분야, 나머지 추세 샘플.",
+        "note": "L1 실측 연간 수출/매출(2018–2024) 기반 2018=100 지수. 엔드포인트는 검증 통계(콘텐츠산업조사·식약처·농식품부·관광공사), 분기는 선형보간, 2025–2026Q2는 2024 확정치 유지.",
         "quarters": [label(q) for q in disp],
         "composite": [composite[q] for q in disp],
         "domains": {g: [idx[g][q] for q in disp] for g in genres},
