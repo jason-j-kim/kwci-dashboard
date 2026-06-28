@@ -70,6 +70,26 @@ def _real_idx_q(genre: str, year: int, q: int) -> float:
     return round(lo + (hi - lo) * (q - 0.5) / 4.0, 1)
 
 
+def _idx_q_from_annual(aidx: dict, year: int, q: int) -> float:
+    """이미 2018=100으로 지수화된 연간 dict(aidx)를 분기로 보간. 최신연도 이후는 유지."""
+    last, first = max(aidx), min(aidx)
+
+    def av(yr):
+        if yr in aidx:
+            return aidx[yr]
+        if yr >= last:
+            return aidx[last]
+        if yr <= first:
+            return aidx[first]
+        lo_y = max(y for y in aidx if y < yr)
+        hi_y = min(y for y in aidx if y > yr)
+        return aidx[lo_y] + (aidx[hi_y] - aidx[lo_y]) * (yr - lo_y) / (hi_y - lo_y)
+
+    lo = av(year)
+    hi = av(year + 1)
+    return round(lo + (hi - lo) * (q - 0.5) / 4.0, 1)
+
+
 def _current_quarter():
     now = datetime.now(timezone(timedelta(hours=9)))
     return now.year, (now.month - 1) // 3 + 1
@@ -176,10 +196,24 @@ def build_history(sample: bool = False):
     qs = quarters(base)
     genres = list(config.GENRE_WEIGHTS)
 
-    # 1차 소스: 검증 통계 기반 실측 연간지수(REAL_ANNUAL_INDEX)를 분기로 보간.
-    # (KOSIS/KTO 라이브 백필 함수는 보존하되 기본 산출에서는 결정론적 실측 시계열을 사용)
-    sources = {g: "stat(real 2018-2024)" for g in genres}
-    idx = {g: {qq: _real_idx_q(g, qq[0], qq[1]) for qq in qs} for g in genres}
+    # 콘텐츠 4분야(K-pop·K영상·게임·웹툰)는 KOSIS 콘텐츠산업조사 연간 수출(2018~)을
+    # 라이브로 받아 2018=100 지수화한다(API 자동화). 나머지 4분야(푸드·패션·뷰티·관광)는
+    # 장기 백필이 API로 깔끔하지 않아 검증 통계 고정값(REAL_ANNUAL_INDEX)을 사용한다.
+    # KOSIS 키 없거나 응답 결측이면 해당 분야도 검증고정값으로 폴백(결정론적).
+    KOSIS_GENRES = {"kpop", "kvideo", "kgame", "kwebtoon"}
+    kosis = None if sample else _kosis_annual()  # {genre: {year: 전국 수출액}}
+    idx, sources = {}, {}
+    for g in genres:
+        ann = kosis.get(g) if (kosis and g in KOSIS_GENRES) else None
+        yrs = sorted(y for y in (ann or {}) if y >= config.HISTORY_BASE_YEAR)
+        if ann and len(yrs) >= 2 and ann.get(config.HISTORY_BASE_YEAR):
+            base_v = ann[config.HISTORY_BASE_YEAR]
+            aidx = {y: ann[y] / base_v * 100 for y in ann if ann[y] is not None}
+            idx[g] = {qq: _idx_q_from_annual(aidx, qq[0], qq[1]) for qq in qs}
+            sources[g] = "kosis(real)"
+        else:
+            idx[g] = {qq: _real_idx_q(g, qq[0], qq[1]) for qq in qs}
+            sources[g] = "stat(verified-fixed)"
     weights = processor.active_weights()
     composite = {qq: round(sum(weights[g] * idx[g][qq] for g in genres), 1) for qq in qs}
 
@@ -194,7 +228,7 @@ def build_history(sample: bool = False):
         "weight_profile": config.ACTIVE_WEIGHT_PROFILE,
         "sources": sources,
         "real_domains": real_n,
-        "note": "L1 실측 연간 수출/매출(2018–2024) 기반 2018=100 지수. 엔드포인트는 검증 통계(콘텐츠산업조사·식약처·농식품부·관광공사), 분기는 선형보간, 2025–2026Q2는 2024 확정치 유지.",
+        "note": f"2018=100 분기지수. 콘텐츠 4분야(K-pop·K영상·게임·웹툰)는 KOSIS 콘텐츠산업조사 연간 수출 실측 {sum(1 for s in sources.values() if s == 'kosis(real)')}/4 연결, 푸드·패션·뷰티·관광은 검증 통계 고정값(식약처·관세청·농식품부·관광공사). 분기 선형보간, 최신 확정연도 이후 유지.",
         "quarters": [label(q) for q in disp],
         "composite": [composite[q] for q in disp],
         "domains": {g: [idx[g][q] for q in disp] for g in genres},
