@@ -214,6 +214,17 @@ def build_history(sample: bool = False):
         else:
             idx[g] = {qq: _real_idx_q(g, qq[0], qq[1]) for qq in qs}
             sources[g] = "stat(verified-fixed)"
+    # 관광은 KTO 출입국관광통계(월별 방한 외래객, 2018~)로 2018=100 지수화 — API 자동화.
+    # KTO 키 없거나 2018 베이스 결측이면 검증고정값 유지(폴백).
+    if not sample:
+        kto = _kto_quarterly(qs)
+        if kto:
+            bvals = [kto[(base, q)] for q in (1, 2, 3, 4) if (base, q) in kto and kto[(base, q)] > 0.01]
+            bavg = (sum(bvals) / len(bvals)) if bvals else 0.0
+            if bavg > 0:
+                idx["ktourism"] = {qq: round(kto.get(qq, 0.0) / bavg * 100, 1) for qq in qs}
+                sources["ktourism"] = "kto(real)"
+
     weights = processor.active_weights()
     composite = {qq: round(sum(weights[g] * idx[g][qq] for g in genres), 1) for qq in qs}
 
@@ -228,7 +239,12 @@ def build_history(sample: bool = False):
         "weight_profile": config.ACTIVE_WEIGHT_PROFILE,
         "sources": sources,
         "real_domains": real_n,
-        "note": f"2018=100 분기지수. 콘텐츠 4분야(K-pop·K영상·게임·웹툰)는 KOSIS 콘텐츠산업조사 연간 수출 실측 {sum(1 for s in sources.values() if s == 'kosis(real)')}/4 연결, 푸드·패션·뷰티·관광은 검증 통계 고정값(식약처·관세청·농식품부·관광공사). 분기 선형보간, 최신 확정연도 이후 유지.",
+        "note": f"2018=100 분기지수. 콘텐츠 4분야(K-pop·K영상·게임·웹툰)는 KOSIS 콘텐츠산업조사 연간 수출 실측 {sum(1 for s in sources.values() if s == 'kosis(real)')}/4 연결, 관광은 KTO 출입국통계, 푸드·패션·뷰티는 검증 통계 고정값(농식품부·식약처). 분기 선형보간, 최신 확정연도 이후 유지.",
+        "notes": {
+            "kwebtoon": "K웹툰 L1은 KOSIS '만화 수출' 기준. 콘텐츠산업조사의 만화산업은 출판만화+온라인만화(웹툰)를 포함하며, 2020년부터 웹툰이 매출의 과반·수출을 주도(종이 만화 아님). 2018년 수출 베이스가 작아 증가 배수가 크게 보이는 저(低)베이스 효과 유의. 웹툰 '산업 매출'(2024년 2.29조원, 4.9배)은 내수 포함이라 별도 지표로 해석.",
+            "ktourism": "K관광 L1은 KTO 출입국관광통계(방한 외래객). 2020–21 코로나 급감·이후 회복 반영.",
+            "vintage": "최신 확정 연간은 2024년(2025년 통계 미발표). 2025년은 2024 확정치로 보수적 유지(참고: 2025 상반기 만화·웹툰 수출 전년동기비 약 -15%).",
+        },
         "quarters": [label(q) for q in disp],
         "composite": [composite[q] for q in disp],
         "domains": {g: [idx[g][q] for q in disp] for g in genres},
