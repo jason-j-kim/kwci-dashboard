@@ -109,6 +109,7 @@ const l2Latest = document.querySelector("#l2Latest");
 
 let selected = domains[0].id;
 let latest = null; // kwci_latest.json payload
+let historyData = null; // history.json payload (2018=100)
 
 function getWeight(domain) {
   return toggle.checked ? domain.altWeight : domain.weight;
@@ -124,11 +125,10 @@ function renderTabs() {
 
 function renderDetail() {
   const domain = domains.find((item) => item.id === selected);
-  const live = latest ? " · 실측 DSI" : " · 샘플 DSI";
   detail.innerHTML = `
     <div class="domain-kicker">
       <span class="pill">가중치 ${(getWeight(domain) * 100).toFixed(1)}%</span>
-      <span class="pill">DSI ${domain.dsi}${live}</span>
+      <span class="pill">현재 지수 ${domain.dsi} (2018=100)</span>
       <span class="pill">분기 패널</span>
     </div>
     <h3>${domain.name}</h3>
@@ -174,6 +174,9 @@ function computeKwci() {
 }
 
 function headlineKwci() {
+  if (historyData && historyData.composite && historyData.composite.length) {
+    return historyData.composite[historyData.composite.length - 1];
+  }
   if (latest && latest.global && typeof latest.global.global_index === "number") {
     return latest.global.global_index;
   }
@@ -204,10 +207,11 @@ function drawChart() {
   ctx.lineTo(padding.left + chartW, padding.top + chartH);
   ctx.stroke();
 
+  const yMax = Math.max(100, Math.ceil(Math.max(...domains.map((d) => d.dsi)) / 100) * 100);
   ctx.fillStyle = "#657080";
   ctx.font = "12px Segoe UI, sans-serif";
-  [0, 25, 50, 75, 100].forEach((tick) => {
-    const y = padding.top + chartH - chartH * tick / 100;
+  [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(yMax * f)).forEach((tick) => {
+    const y = padding.top + chartH - chartH * tick / yMax;
     ctx.fillText(String(tick), 10, y + 4);
     ctx.strokeStyle = tick === 0 ? "#d9e0e8" : "#eef2f6";
     ctx.beginPath();
@@ -218,7 +222,7 @@ function drawChart() {
 
   domains.forEach((domain, index) => {
     const x = padding.left + index * (chartW / domains.length) + (chartW / domains.length - barW) / 2;
-    const barH = chartH * domain.dsi / 100;
+    const barH = chartH * domain.dsi / yMax;
     const y = padding.top + chartH - barH;
     ctx.fillStyle = domain.color;
     ctx.fillRect(x, y, barW, barH);
@@ -238,17 +242,16 @@ function drawChart() {
 }
 
 function renderDashboard() {
-  kwciValue.textContent = headlineKwci().toFixed(1);
+  const v = headlineKwci().toFixed(1);
+  kwciValue.textContent = v;
+  const hero = document.querySelector("#heroKwci");
+  if (hero) hero.textContent = v;
   drawChart();
 }
 
 function applyLatest(payload) {
   latest = payload;
-  // 도메인 DSI를 실측으로 덮어쓰기
-  if (Array.isArray(payload.domains)) {
-    const byId = Object.fromEntries(payload.domains.map((d) => [d.genre, d.dsi_mean]));
-    domains.forEach((d) => { if (byId[d.id] != null) d.dsi = Math.round(byId[d.id]); });
-  }
+  // 막대·헤드라인은 history(2018=100)에서 채운다. 여기선 국가 패널만 사용.
 }
 
 function renderLatestPanel() {
@@ -264,9 +267,9 @@ function renderLatestPanel() {
     `${PROFILE_LABELS[k] || k} ${v.global_mean}`).join(" · ");
   l2Latest.innerHTML = `
     <div class="latest-headline">
-      <span>글로벌 종합 KWCI</span>
+      <span>국가 간 평균 (상대 0~100)</span>
       <strong>${g.global_index ?? "-"}</strong>
-      <span class="muted-line">단순평균 ${g.global_index_mean ?? "-"} · 인구가중 ${g.global_index_pop_weighted ?? "-"}</span>
+      <span class="muted-line">단순평균 ${g.global_index_mean ?? "-"} · 인구가중 ${g.global_index_pop_weighted ?? "-"} · 현재 단면</span>
     </div>
     <div class="latest-table">
       <div class="latest-row">
@@ -356,20 +359,28 @@ function drawLineChart(canvas, labels, series) {
 }
 
 async function loadHistory() {
-  const cv = document.querySelector("#historyChart"); if (!cv) return;
   try {
     const res = await fetch("history.json", { cache: "no-store" });
     if (!res.ok) throw new Error();
     const h = await res.json();
-    const colorOf = id => (domains.find(d => d.id === id) || {}).color || "#888";
-    const series = [{ name: "종합", color: "#17202a", width: 3, data: h.composite }];
-    Object.keys(h.domains).forEach(g => series.push({ name: h.domain_names[g], color: colorOf(g), width: 1.3, data: h.domains[g] }));
-    drawLineChart(cv, h.quarters, series);
-    document.querySelector("#historyLegend").innerHTML = series.map(s =>
-      `<span class="lg"><i style="background:${s.color}"></i>${s.name}</span>`).join("");
-    document.querySelector("#historyNote").textContent = `${h.note} · 활성 ${h.weight_profile}`;
+    historyData = h;
+    const last = h.quarters.length - 1;
+    domains.forEach((d) => { if (h.domains[d.id]) d.dsi = h.domains[d.id][last]; });
+    renderDashboard();
+    renderDetail();
+    const cv = document.querySelector("#historyChart");
+    if (cv) {
+      const colorOf = id => (domains.find(d => d.id === id) || {}).color || "#888";
+      const series = [{ name: "종합", color: "#17202a", width: 3, data: h.composite }];
+      Object.keys(h.domains).forEach(g => series.push({ name: h.domain_names[g], color: colorOf(g), width: 1.3, data: h.domains[g] }));
+      drawLineChart(cv, h.quarters, series);
+      document.querySelector("#historyLegend").innerHTML = series.map(s =>
+        `<span class="lg"><i style="background:${s.color}"></i>${s.name}</span>`).join("");
+      document.querySelector("#historyNote").textContent = `${h.note} · 활성 ${h.weight_profile}`;
+    }
   } catch (e) {
-    document.querySelector("#historyNote").textContent = "data/history.json 생성 후 표시됩니다 (python kwci_pipeline/history.py).";
+    const n = document.querySelector("#historyNote");
+    if (n) n.textContent = "history.json 생성 후 표시됩니다 (python kwci_pipeline/history.py).";
   }
 }
 

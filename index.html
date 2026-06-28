@@ -53,8 +53,8 @@
       <div class="hero-panel" aria-label="지수 핵심 구조">
         <div class="score-card map-card">
           <div>
-            <span>Country Realtime Panel</span>
-            <strong>KWCI 78.2</strong>
+            <span>K-Wave 종합지수 (2018=100)</span>
+            <strong>KWCI <span id="heroKwci">—</span></strong>
           </div>
           <div class="mini-map" aria-hidden="true">
             <span class="point us">US</span>
@@ -223,13 +223,13 @@
       </div>
       <div class="dashboard-grid">
         <div class="index-meter">
-          <span>현재 KWCI</span>
-          <strong id="kwciValue">0</strong>
-          <small>샘플 DSI 기반 시뮬레이션</small>
+          <span>현재 KWCI (2018=100)</span>
+          <strong id="kwciValue">—</strong>
+          <small>막대 = 분야별 현재 지수(2018=100). 100 = 2018년 수준. 추세는 아래 '추이' 차트.</small>
         </div>
         <canvas id="barChart" width="900" height="420" aria-label="도메인별 DSI 막대그래프"></canvas>
         <div class="live-panel">
-          <h3>L2 국가별 최신 산출</h3>
+          <h3>국가 간 상대 비교 (현재 단면, 0~100)</h3>
           <div id="l2Latest">아직 산출 파일을 읽지 못했습니다.</div>
         </div>
       </div>
