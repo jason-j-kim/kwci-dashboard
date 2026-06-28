@@ -270,11 +270,11 @@
           <div id="tourDivPanel">불러오는 중…</div>
         </div>
         <div class="trend-card">
-          <h3>수용 시장 다변화 (ENM) <small>분야별 · 국가별 YouTube 구성(횡단)</small></h3>
+          <h3>수용 시장 다변화 (ENM) <small>분야별 · KOFICE 국가별 관심(연 1회·안정)</small></h3>
           <div id="audDivPanel">불러오는 중…</div>
         </div>
       </div>
-      <p class="muted-line">다변화 지수↑ = 특정국 쏠림↓(복원력↑). 관광=방한 외래객 국적 구성의 유효시장수, 수용=분야별 국가 YouTube 소비 구성의 유효시장수(ENM=1/HHI). 출처: history.json · kwci_latest.json.</p>
+      <p class="muted-line">다변화 지수↑ = 특정국 쏠림↓(복원력↑). 관광=방한 외래객 국적 구성의 유효시장수, 수용=분야별 KOFICE 국가별 관심 구성의 유효시장수(ENM=1/HHI). 수용은 단면 노이즈가 없는 KOFICE 설문이 1차 기준이며, YouTube는 참고 보조(YT). 출처: history.json · kwci_latest.json.</p>
     </section>
   </main>
 
@@ -311,10 +311,12 @@
       const el = document.getElementById('audDivPanel');
       const rows = order.filter(function(g){ return ad[g] && ad[g].enm != null; }).map(function(g){
         const d = ad[g];
-        return '<tr><td>' + (names[g] || g) + '</td><td style="text-align:right">' + d.enm + '</td><td style="text-align:right">' + d.enm_pct + '%</td><td>' + d.top_country + ' ' + d.top_share_pct + '%</td></tr>';
+        const yt = (d.youtube_enm != null) ? d.youtube_enm : '-';
+        return '<tr><td>' + (names[g] || g) + '</td><td style="text-align:right">' + d.enm + '</td><td style="text-align:right">' + d.enm_pct + '%</td><td>' + d.top_country + ' ' + d.top_share_pct + '%</td><td style="text-align:right;color:#94a3b8">' + yt + '</td></tr>';
       }).join('');
       el.innerHTML = rows
-        ? '<table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="color:#64748b"><th style="text-align:left">분야</th><th style="text-align:right">ENM</th><th style="text-align:right">최대대비</th><th style="text-align:left">최다 소비국</th></tr>' + rows + '</table>'
+        ? '<table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="color:#64748b"><th style="text-align:left">분야</th><th style="text-align:right">ENM</th><th style="text-align:right">최대대비</th><th style="text-align:left">최다 관심국(KOFICE)</th><th style="text-align:right">YT참고</th></tr>' + rows + '</table>'
+        + '<div style="font-size:11px;color:#94a3b8;margin-top:6px">ENM·최다 관심국 = KOFICE 설문(안정) 기준. YT참고 = YouTube 단면 ENM(노이즈, 비교용).</div>'
         : '수용 다변화 데이터 없음(다음 자동수집 후 표시).';
     } catch (e) { var a = document.getElementById('audDivPanel'); if (a) a.textContent = '로드 실패'; }
   })();
