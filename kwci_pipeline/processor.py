@@ -171,30 +171,48 @@ def build_global(country: pd.DataFrame) -> dict:
     }
 
 
-def audience_diversification(scored: pd.DataFrame) -> dict:
-    """수용 시장 다변화(audience): 분야별로 국가별 소비(YouTube 조회수) 구성비의
-    유효시장수 ENM=1/HHI 산출. 값↑ = 특정국 쏠림↓ = 수용 저변이 지리적으로 넓음.
+def _enm_of(series: pd.Series) -> dict | None:
+    """국가별 값 시리즈 → 유효시장수 ENM=1/HHI + 상위국."""
+    v = series.astype(float)
+    tot = float(v.sum())
+    if tot <= 0 or len(v) == 0:
+        return None
+    p = v / tot
+    hhi = float((p ** 2).sum())
+    enm = (1.0 / hhi) if hhi > 0 else 0.0
+    return {
+        "enm": round(enm, 2),
+        "enm_pct": round(enm / max(len(v), 1) * 100, 1),
+        "hhi": round(hhi, 4),
+        "top_country": v.idxmax(),
+        "top_share_pct": round(float(p.max()) * 100, 1),
+    }
 
-    YouTube 국가별 데이터로 산출(현재 단면). Trends를 보조 결합할 수 있으나 1차는 조회수.
+
+def audience_diversification(scored: pd.DataFrame) -> dict:
+    """수용 시장 다변화(audience): 분야별 국가 구성비의 유효시장수 ENM=1/HHI. 값↑=쏠림↓.
+
+    1차 기준 = KOFICE 해외한류실태조사(survey_score): 국가별 '실제 관심/소비'를 연 1회
+    측정한 안정 지표 → 단면 노이즈 없음(YouTube API의 '지역노출×글로벌조회수' 왜곡 회피).
+    youtube_* = 참고용 보조(현재 단면, 노이즈 큼). basis로 출처 명시.
     """
     out = {}
     for g, grp in scored.groupby("genre"):
-        v = grp.groupby("country")["youtube_views"].sum().astype(float)
-        tot = float(v.sum())
-        if tot <= 0:
-            out[g] = {"enm": None, "note": "no_youtube_data"}
-            continue
-        p = v / tot
-        hhi = float((p ** 2).sum())
-        enm = (1.0 / hhi) if hhi > 0 else 0.0
-        n = int((v > 0).shape[0]) or 1
-        out[g] = {
-            "enm": round(enm, 2),                       # 유효시장수(1~국가수)
-            "enm_pct": round(enm / max(len(v), 1) * 100, 1),  # 최대 다변화 대비 %
-            "hhi": round(hhi, 4),
-            "top_country": v.idxmax(),
-            "top_share_pct": round(float(p.max()) * 100, 1),
-        }
+        survey = _enm_of(grp.groupby("country")["survey_score"].mean())
+        yt = _enm_of(grp.groupby("country")["youtube_views"].sum())
+        if survey:
+            rec = dict(survey)
+            rec["basis"] = "kofice_survey"
+            if yt:
+                rec["youtube_enm"] = yt["enm"]
+                rec["youtube_top"] = f"{yt['top_country']} {yt['top_share_pct']}%"
+            out[g] = rec
+        elif yt:
+            rec = dict(yt)
+            rec["basis"] = "youtube_snapshot"
+            out[g] = rec
+        else:
+            out[g] = {"enm": None, "basis": "no_data"}
     return out
 
 
@@ -240,7 +258,7 @@ def export_outputs(scored: pd.DataFrame, country: pd.DataFrame, extras: dict | N
         "countries": country.to_dict(orient="records"),
         "top": country.head(5).to_dict(orient="records"),
         "audience_diversification": audience_diversification(scored),
-        "audience_diversification_note": "분야별 국가 소비(YouTube 조회수) 구성비의 유효시장수 ENM=1/HHI. K-pop·K영상 등 수용 저변의 지리적 분산도(횡단). 값↑=쏠림↓.",
+        "audience_diversification_note": "분야별 국가 구성비의 유효시장수 ENM=1/HHI(값↑=쏠림↓). 1차 기준=KOFICE 해외한류실태조사 국가별 관심(연 1회·안정, 단면 노이즈 없음). youtube_*는 참고용 보조(현재 단면, YouTube API 한계로 노이즈 큼). basis 필드로 출처 표시.",
     }
     if extras:
         latest.update(extras)
