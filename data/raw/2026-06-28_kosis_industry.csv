@@ -1,5 +1,5 @@
 ﻿genre,export_kusd,year,source
-kwebtoon,177957.0,2023,kosis_api
-kpop,1222535.0,2023,kosis_api
-kvideo,1103510.0,2023,kosis_api
-kgame,8394003.0,2023,kosis_api
+kpop,1220000,2023,sample_kosis
+kvideo,1106000,2023,sample_kosis
+kgame,8390000,2023,sample_kosis
+kwebtoon,178000,2023,sample_kosis
