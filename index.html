@@ -256,6 +256,26 @@
         </div>
       </div>
     </section>
+
+    <section class="section trends" id="diversification">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Diversification</p>
+          <h2>시장 다변화 지수</h2>
+        </div>
+      </div>
+      <div class="trends-grid">
+        <div class="trend-card">
+          <h3>관광 source-market 다변화 <small>(2018=100 · 국적 구성)</small></h3>
+          <div id="tourDivPanel">불러오는 중…</div>
+        </div>
+        <div class="trend-card">
+          <h3>수용 시장 다변화 (ENM) <small>분야별 · 국가별 YouTube 구성(횡단)</small></h3>
+          <div id="audDivPanel">불러오는 중…</div>
+        </div>
+      </div>
+      <p class="muted-line">다변화 지수↑ = 특정국 쏠림↓(복원력↑). 관광=방한 외래객 국적 구성의 유효시장수, 수용=분야별 국가 YouTube 소비 구성의 유효시장수(ENM=1/HHI). 출처: history.json · kwci_latest.json.</p>
+    </section>
   </main>
 
   <footer>
@@ -264,5 +284,40 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+  (async function(){
+    const cb = '?cb=' + Date.now();
+    try {
+      const h = await (await fetch('history.json' + cb)).json();
+      const td = h.tourism_diversification || [], q = h.quarters || [];
+      const el = document.getElementById('tourDivPanel');
+      if (td.length) {
+        const last = td[td.length - 1], first = td[0];
+        const sh = h.tourism_shares || {};
+        const rows = Object.keys(sh).sort().map(function(y){
+          return '<tr><td>' + y + '</td><td style="text-align:right">' + (sh[y].CN != null ? sh[y].CN + '%' : '-') + '</td></tr>';
+        }).join('');
+        el.innerHTML = '<div style="font-size:34px;font-weight:800;color:#2563eb">' + last + '</div>'
+          + '<div style="color:#64748b;font-size:12px">' + (q.length ? q[q.length-1] : '') + ' · 2018=100 (시작 ' + first + ')</div>'
+          + '<table style="width:100%;margin-top:10px;font-size:12px;border-collapse:collapse">'
+          + '<tr style="color:#64748b"><th style="text-align:left">연도</th><th style="text-align:right">중국 비중</th></tr>' + rows + '</table>';
+      } else { el.textContent = '관광 다변화 데이터 없음'; }
+    } catch (e) { var t = document.getElementById('tourDivPanel'); if (t) t.textContent = '로드 실패'; }
+    try {
+      const k = await (await fetch('kwci_latest.json' + cb)).json();
+      const ad = k.audience_diversification || {};
+      const names = (k.domains || []).reduce(function(m,d){ m[d.genre] = d.genre_name; return m; }, {});
+      const order = ['kpop','kvideo','kgame','kwebtoon','kfood','kbeauty','kfashion','ktourism'];
+      const el = document.getElementById('audDivPanel');
+      const rows = order.filter(function(g){ return ad[g] && ad[g].enm != null; }).map(function(g){
+        const d = ad[g];
+        return '<tr><td>' + (names[g] || g) + '</td><td style="text-align:right">' + d.enm + '</td><td style="text-align:right">' + d.enm_pct + '%</td><td>' + d.top_country + ' ' + d.top_share_pct + '%</td></tr>';
+      }).join('');
+      el.innerHTML = rows
+        ? '<table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="color:#64748b"><th style="text-align:left">분야</th><th style="text-align:right">ENM</th><th style="text-align:right">최대대비</th><th style="text-align:left">최다 소비국</th></tr>' + rows + '</table>'
+        : '수용 다변화 데이터 없음(다음 자동수집 후 표시).';
+    } catch (e) { var a = document.getElementById('audDivPanel'); if (a) a.textContent = '로드 실패'; }
+  })();
+  </script>
 </body>
 </html>
