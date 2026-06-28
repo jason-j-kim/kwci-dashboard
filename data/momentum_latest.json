@@ -3,21 +3,21 @@
   "type": "monthly momentum subindex (nowcast)",
   "layers": "L1 관세청 월수출 + L3 YouTube·Google Trends (연단위·인프라 제외)",
   "weight_profile": "two_axis_cultural",
-  "global_momentum": 23.93,
+  "global_momentum": 24.01,
   "countries": [
     {
       "country": "US",
-      "momentum": 49.16,
+      "momentum": 49.26,
       "country_name": "미국"
     },
     {
       "country": "MY",
-      "momentum": 45.49,
+      "momentum": 45.7,
       "country_name": "말레이시아"
     },
     {
       "country": "AE",
-      "momentum": 29.93,
+      "momentum": 30.08,
       "country_name": "UAE"
     },
     {
@@ -27,74 +27,74 @@
     },
     {
       "country": "JP",
-      "momentum": 26.56,
+      "momentum": 26.59,
       "country_name": "일본"
     },
     {
       "country": "GB",
-      "momentum": 25.09,
+      "momentum": 25.17,
       "country_name": "영국"
     },
     {
       "country": "VN",
-      "momentum": 21.84,
+      "momentum": 21.69,
       "country_name": "베트남"
     },
     {
       "country": "FR",
-      "momentum": 19.48,
+      "momentum": 19.42,
       "country_name": "프랑스"
     },
     {
       "country": "AR",
-      "momentum": 19.23,
+      "momentum": 19.38,
       "country_name": "아르헨티나"
     },
     {
       "country": "ID",
-      "momentum": 18.58,
+      "momentum": 19.08,
       "country_name": "인도네시아"
     },
     {
       "country": "TR",
-      "momentum": 18.0,
+      "momentum": 17.8,
       "country_name": "터키"
     },
     {
       "country": "IN",
-      "momentum": 15.67,
+      "momentum": 16.0,
       "country_name": "인도"
     },
     {
       "country": "TH",
-      "momentum": 15.18,
+      "momentum": 14.97,
       "country_name": "태국"
     },
     {
       "country": "ZA",
-      "momentum": 14.42,
+      "momentum": 14.64,
       "country_name": "남아공"
     },
     {
       "country": "BR",
-      "momentum": 11.43,
+      "momentum": 11.49,
       "country_name": "브라질"
     }
   ],
   "top": [
     {
       "country": "US",
-      "momentum": 49.16,
+      "momentum": 49.26,
       "country_name": "미국"
     },
     {
       "country": "MY",
-      "momentum": 45.49,
+      "momentum": 45.7,
       "country_name": "말레이시아"
     },
     {
       "country": "AE",
-      "momentum": 29.93,
+      "momentum": 30.08,
       "country_name": "UAE"
     },
     {
@@ -104,7 +104,7 @@
     },
     {
       "country": "JP",
-      "momentum": 26.56,
+      "momentum": 26.59,
       "country_name": "일본"
     }
   ]
