@@ -52,31 +52,16 @@
         </div>
       </div>
       <div class="hero-panel" aria-label="지수 핵심 구조">
-        <div class="score-card map-card">
+        <div class="score-card">
           <div>
             <span>K-Wave 종합지수 (2018=100)</span>
             <strong>KWCI <span id="heroKwci">—</span></strong>
-          </div>
-          <div class="mini-map" aria-hidden="true">
-            <span class="point us">US</span>
-            <span class="point br">BR</span>
-            <span class="point fr">FR</span>
-            <span class="point ae">AE</span>
-            <span class="point in">IN</span>
-            <span class="point th">TH</span>
-            <span class="point jp">JP</span>
           </div>
         </div>
         <div class="layer-grid">
           <div><b>L1</b><span>경제지표</span></div>
           <div><b>L2</b><span>플랫폼 데이터</span></div>
           <div><b>L3</b><span>정성 아카이브</span></div>
-        </div>
-        <div class="signal-strip" aria-label="국가별 샘플 지수">
-          <span><b>US</b><i style="--v:67%"></i></span>
-          <span><b>TH</b><i style="--v:59%"></i></span>
-          <span><b>JP</b><i style="--v:55%"></i></span>
-          <span><b>BR</b><i style="--v:49%"></i></span>
         </div>
       </div>
     </section>
@@ -154,7 +139,7 @@
       </div>
       <div class="pipeline-track">
         <div><b>L1 경제지표</b><span>수출액, 매출, 관광수입, 시장 규모</span></div>
-        <div><b>L2 플랫폼 데이터</b><span>국가별 YouTube, Reddit, KF API, OTT·차트 지표</span></div>
+        <div><b>L2 플랫폼 데이터</b><span>국가별 YouTube, Google Trends, KF API, OTT·차트 지표</span></div>
         <div><b>L3 정성 아카이브</b><span>언론, 비평, 전시·수상, 연구팀 큐레이션 기록</span></div>
         <div><b>출력</b><span>국가 × 분기 × 도메인 패널과 KWCI 보고서</span></div>
       </div>
@@ -173,10 +158,10 @@
           <h3>KWCI 안에서의 위치</h3>
           <p>
             새 파이프라인은 기존 KWCI 3레이어 프레임워크를 대체하지 않고, L2 플랫폼 데이터 레이어의
-            국가별 실시간 모듈로 통합합니다. KOFICE 설문은 기준선으로 두고, YouTube·Reddit·KF API가
+            국가별 실시간 모듈로 통합합니다. KOFICE 설문은 기준선으로 두고, YouTube·Google Trends·KF API가
             국가별 소비와 소셜 반응의 단기 변동을 보정합니다.
           </p>
-          <code>GSI(c,g) = .40S_norm + .35Y_norm + .25R_norm</code>
+          <code>GSI(c,g) = .40S_norm + .35Y_norm + .25T_norm</code>
           <code>KWCI_L2(c) = Σ(w_g × GSI(c,g)) + .05K_norm(c)</code>
         </article>
         <article class="module-card">
@@ -189,25 +174,17 @@
             <li>KOFICE 해외한류실태조사 CSV: 연 1회 기준값</li>
             <li>KF 한류현황 API: 조직·팬클럽 인프라 보정</li>
             <li>YouTube Data API: 국가별 트렌딩 K-콘텐츠 조회수</li>
-            <li>Reddit PRAW: 장르별 서브레딧 주간 언급량</li>
+            <li>Google Trends(pytrends): 분야별 국가 검색 관심도</li>
           </ul>
         </article>
         <article class="module-card">
           <h3>운영 주기</h3>
           <ul>
-            <li>일별: YouTube·Reddit 수집, 정규화, L2 보정값 산출</li>
+            <li>일별: YouTube·Google Trends 수집, 정규화, L2 보정값 산출</li>
             <li>주별: KF API 갱신과 팬덤 인프라 보정</li>
             <li>연간: KOFICE 설문 기반 국가·장르 기준선 재설정</li>
           </ul>
         </article>
-      </div>
-      <div class="genre-strip" aria-label="L2 장르 가중치">
-        <span style="--w:35">K-pop 35%</span>
-        <span style="--w:30">K-drama 30%</span>
-        <span style="--w:10">K-movie 10%</span>
-        <span style="--w:12">K-beauty 12%</span>
-        <span style="--w:8">K-food 8%</span>
-        <span style="--w:5">K-culture 5%</span>
       </div>
     </section>
 
