@@ -60,8 +60,8 @@
         </div>
         <div class="layer-grid">
           <div><b>L1</b><span>경제지표</span></div>
-          <div><b>L2</b><span>플랫폼 데이터</span></div>
-          <div><b>L3</b><span>정성 아카이브</span></div>
+          <div><b>L2</b><span>영향력</span></div>
+          <div><b>L3</b><span>수용자 반응</span></div>
         </div>
       </div>
     </section>
@@ -89,7 +89,7 @@
       <div class="domain-layout">
         <article class="domain-detail" aria-live="polite"></article>
         <aside class="weight-panel">
-          <h3>초기 가중치</h3>
+          <h3>도메인 가중치</h3>
           <div class="weight-list"></div>
         </aside>
       </div>
@@ -107,13 +107,13 @@
           <span>Step 1</span>
           <h3>원시 지표 정규화</h3>
           <code>x_norm = (x_t - x_min) / (x_max - x_min) × 100</code>
-          <p>2018Q1부터 현재까지의 시계열을 0-100 구간으로 변환합니다.</p>
+          <p>시계열은 2018=100 기준연도 지수로, 국가 간 현재 단면은 0-100 상대점수로 분리합니다.</p>
         </article>
         <article>
           <span>Step 2</span>
           <h3>DSI 산출</h3>
           <code>DSI = .5L1 + .3L2 + .2L3</code>
-          <p>경제지표·플랫폼 데이터·정성 아카이브를 도메인별 서브 인덱스로 합산합니다.</p>
+          <p>경제지표·영향력·수용자 반응을 도메인별 서브 인덱스로 합산합니다.</p>
         </article>
         <article>
           <span>Step 3</span>
@@ -139,8 +139,8 @@
       </div>
       <div class="pipeline-track">
         <div><b>L1 경제지표</b><span>수출액, 매출, 관광수입, 시장 규모</span></div>
-        <div><b>L2 플랫폼 데이터</b><span>국가별 YouTube, Google Trends, KF API, OTT·차트 지표</span></div>
-        <div><b>L3 정성 아카이브</b><span>언론, 비평, 전시·수상, 연구팀 큐레이션 기록</span></div>
+        <div><b>L2 영향력</b><span>KF API, 플랫폼·차트·수상 지표</span></div>
+        <div><b>L3 수용자 반응</b><span>KOFICE, YouTube, Google Trends</span></div>
         <div><b>출력</b><span>국가 × 분기 × 도메인 패널과 KWCI 보고서</span></div>
       </div>
       <div class="source-grid"></div>
@@ -200,8 +200,14 @@
           <h2>시범 지수 보드</h2>
         </div>
         <label class="control">
-          <span>가중치: 경제중심(2축) 보기</span>
-          <input type="checkbox" id="diversityToggle">
+          <span>가중치 프로파일</span>
+          <select id="weightProfileSelect" aria-label="가중치 프로파일 선택">
+            <option value="active">활성 프로파일</option>
+            <option value="industry">산업규모안</option>
+            <option value="equal">동일배분</option>
+            <option value="two_axis_economic">경제중심(α=0.6)</option>
+            <option value="two_axis_cultural">문화중심(α=0.4)</option>
+          </select>
         </label>
       </div>
       <div class="dashboard-grid">

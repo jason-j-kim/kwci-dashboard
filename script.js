@@ -3,17 +3,17 @@
 
 const domains = [
   {
-    id: "kpop", name: "K-pop", weight: 0.20, altWeight: 0.0841, dsi: 43, color: "#1d5fd1",
+    id: "kpop", name: "K-pop", weight: 0.20, dsi: 43, color: "#1d5fd1",
     summary: "음반 수출과 글로벌 차트·스트리밍, YouTube/SNS 반응을 결합한 대표 한류 분야.",
     sources: ["관세청 HS8523", "KOCCA·DART", "Billboard/Luminate", "Spotify Charts", "YouTube Data API", "Google Trends"],
     indicators: {
       "L1 경제": ["음반 수출액(HS 8523)", "해외 스트리밍·엔터 매출(KOCCA·DART)"],
       "L2 영향력": ["Billboard Hot100·Global200 성과", "Spotify Global Top200 스트림"],
-      "L3 수용자": ["YouTube 한국음악 글로벌 조회수", "Google Trends·Reddit 언급"]
+      "L3 수용자": ["KOFICE 설문 기준선", "YouTube 한국음악 글로벌 조회수", "Google Trends 검색 관심도"]
     }
   },
   {
-    id: "kvideo", name: "K영상", weight: 0.18, altWeight: 0.1031, dsi: 43, color: "#d8426b",
+    id: "kvideo", name: "K영상", weight: 0.18, dsi: 43, color: "#d8426b",
     summary: "드라마·영화 통합. 방송/영화 수출, OTT 랭킹, 글로벌 평점과 반응을 추적.",
     sources: ["KOCCA", "KOFIC", "Netflix Top10 CSV", "IMDb TSV", "Google Trends", "X API"],
     indicators: {
@@ -23,17 +23,17 @@ const domains = [
     }
   },
   {
-    id: "kgame", name: "K게임", weight: 0.16, altWeight: 0.0801, dsi: 43, color: "#7a3ff2",
+    id: "kgame", name: "K게임", weight: 0.16, dsi: 43, color: "#7a3ff2",
     summary: "게임 수출·산업 매출과 Steam 이용지표, 수상·검색 반응을 결합.",
     sources: ["KOCCA 게임백서", "KOSIS", "Steam Web API", "The Game Awards", "Google Trends"],
     indicators: {
       "L1 경제": ["게임 수출액(KOCCA)", "게임산업 매출(KOSIS)"],
       "L2 영향력": ["Steam 동시접속·리뷰(한국 게임)", "The Game Awards 노미·수상"],
-      "L3 수용자": ["Google Trends 한국 게임명", "Reddit·Twitch 반응"]
+      "L3 수용자": ["KOFICE 설문 기준선", "YouTube 게임 영상 조회수", "Google Trends 한국 게임명"]
     }
   },
   {
-    id: "kwebtoon", name: "K웹툰", weight: 0.10, altWeight: 0.0423, dsi: 42, color: "#e07b1a",
+    id: "kwebtoon", name: "K웹툰", weight: 0.10, dsi: 42, color: "#e07b1a",
     summary: "만화·웹툰 수출과 글로벌 플랫폼 확산, 영상화 IP, 커뮤니티 담론.",
     sources: ["KOCCA 만화백서", "KOSIS", "WEBTOON/Tapas", "공공데이터포털", "Google Trends"],
     indicators: {
@@ -43,9 +43,9 @@ const domains = [
     }
   },
   {
-    id: "kfood", name: "K푸드", weight: 0.10, altWeight: 0.2016, dsi: 43, color: "#3b8b4f",
+    id: "kfood", name: "K푸드", weight: 0.10, dsi: 43, color: "#3b8b4f",
     summary: "식품 수출과 해외 레스토랑·미디어·커뮤니티 반응으로 식문화 파급을 측정.",
-    sources: ["aT", "관세청 HS", "Michelin", "Yelp/Google Places", "YouTube/TikTok", "Reddit"],
+    sources: ["관세청 HS", "KOFICE", "KF API", "YouTube Data API", "Google Trends"],
     indicators: {
       "L1 경제": ["농수산식품 수출액(aT)", "품목별 수출(라면·김치·소스·김, 관세청 HS)"],
       "L2 영향력": ["Michelin 선정·미디어 기사", "Yelp/Google 한식당 도시별 신규등록"],
@@ -53,7 +53,7 @@ const domains = [
     }
   },
   {
-    id: "kfashion", name: "K패션", weight: 0.08, altWeight: 0.1701, dsi: 43, color: "#c0398a",
+    id: "kfashion", name: "K패션", weight: 0.08, dsi: 43, color: "#c0398a",
     summary: "의류·섬유 수출과 글로벌 런웨이·플랫폼 노출, SNS 확산을 추적.",
     sources: ["관세청 HS61·62", "KOSIS·섬산련", "패션위크", "무신사", "TikTok", "Google Trends"],
     indicators: {
@@ -63,7 +63,7 @@ const domains = [
     }
   },
   {
-    id: "kbeauty", name: "K뷰티", weight: 0.10, altWeight: 0.2748, dsi: 43, color: "#008c88",
+    id: "kbeauty", name: "K뷰티", weight: 0.10, dsi: 43, color: "#008c88",
     summary: "화장품 수출과 글로벌 유통·미디어, K-beauty 담론 확산을 생활문화 지표로.",
     sources: ["관세청 HS33", "Sephora/Amazon", "글로벌 뷰티지", "TikTok/YouTube", "Google Trends"],
     indicators: {
@@ -73,7 +73,7 @@ const domains = [
     }
   },
   {
-    id: "ktourism", name: "K관광", weight: 0.08, altWeight: 0.044, dsi: 43, color: "#2aa6c4",
+    id: "ktourism", name: "K관광", weight: 0.08, dsi: 43, color: "#2aa6c4",
     summary: "방한 관광 수요와 인지도·인프라, 검색 반응으로 한류 관광을 측정.",
     sources: ["한국관광공사 KTO", "data.go.kr", "TripAdvisor/UNWTO", "TourAPI", "Google Trends"],
     indicators: {
@@ -86,7 +86,7 @@ const domains = [
 
 const sourceGroups = [
   { title: "공공 API", items: ["관세청 UNI-PASS·품목별국가별 수출입실적", "KOSIS 콘텐츠산업조사", "한국관광공사 TourAPI / KTO 관광통계", "KF 한류현황 API"] },
-  { title: "상업 플랫폼 API", items: ["YouTube Data API v3 (live)", "Steam Web API", "Billboard·Spotify·Netflix Top10·IMDb", "Reddit API (키 등록 시)"] },
+  { title: "상업·플랫폼 API", items: ["YouTube Data API v3", "Google Trends(pytrends)", "확장 후보: Billboard·Spotify·Netflix·Steam"] },
   { title: "비공식·수동 수집", items: ["pytrends (Google Trends)", "TikTok Research / Amazon PA API", "시상식·영화제·패션위크 결과", "미디어 모니터링 아카이브"] }
 ];
 
@@ -101,7 +101,7 @@ const tabs = document.querySelector(".tabs");
 const detail = document.querySelector(".domain-detail");
 const weightList = document.querySelector(".weight-list");
 const sourceGrid = document.querySelector(".source-grid");
-const toggle = document.querySelector("#diversityToggle");
+const weightProfileSelect = document.querySelector("#weightProfileSelect");
 const kwciValue = document.querySelector("#kwciValue");
 const canvas = document.querySelector("#barChart");
 const ctx = canvas.getContext("2d");
@@ -112,7 +112,19 @@ let latest = null; // kwci_latest.json payload
 let historyData = null; // history.json payload (2018=100)
 
 function getWeight(domain) {
-  return toggle.checked ? domain.altWeight : domain.weight;
+  const profile = selectedWeightProfile();
+  const profileWeights = latest?.weight_profiles?.[profile]?.weights;
+  const directWeights = profile === latest?.active_weight_profile ? latest?.domain_weights : null;
+  return Number(profileWeights?.[domain.id] ?? directWeights?.[domain.id] ?? domain.weight);
+}
+
+function activeWeightProfile() {
+  return latest?.active_weight_profile || "industry";
+}
+
+function selectedWeightProfile() {
+  const value = weightProfileSelect?.value || "active";
+  return value === "active" ? activeWeightProfile() : value;
 }
 
 function renderTabs() {
@@ -125,9 +137,10 @@ function renderTabs() {
 
 function renderDetail() {
   const domain = domains.find((item) => item.id === selected);
+  const selectedProfile = selectedWeightProfile();
   detail.innerHTML = `
     <div class="domain-kicker">
-      <span class="pill">가중치 ${(getWeight(domain) * 100).toFixed(1)}%</span>
+      <span class="pill">${PROFILE_LABELS[selectedProfile] || selectedProfile} ${(getWeight(domain) * 100).toFixed(1)}%</span>
       <span class="pill">현재 지수 ${domain.dsi} (2018=100)</span>
       <span class="pill">분기 패널</span>
     </div>
@@ -147,13 +160,20 @@ function renderDetail() {
 
 function renderWeights() {
   const total = domains.reduce((sum, domain) => sum + getWeight(domain), 0);
-  const label = toggle.checked ? PROFILE_LABELS.two_axis_economic : PROFILE_LABELS.industry;
-  weightList.innerHTML = `<p class="muted-line">프로파일: <b>${label}</b></p>` + domains.map((domain) => {
+  const profile = selectedWeightProfile();
+  const active = activeWeightProfile();
+  const label = PROFILE_LABELS[profile] || profile;
+  const activeLabel = PROFILE_LABELS[active] || active;
+  const mode = profile === active ? "활성" : "비교";
+  weightList.innerHTML = `<p class="muted-line">${mode} 프로파일: <b>${label}</b>${profile !== active ? ` · 활성 ${activeLabel}` : ""}</p>` + domains.map((domain) => {
     const adjusted = getWeight(domain) / total;
+    const industry = Number(domain.industryWeight ?? domain.weight);
+    const industryText = profile !== "industry" ? `<small>산업기본 ${(industry * 100).toFixed(1)}%</small>` : "";
     return `
       <div class="weight-row">
         <header><span>${domain.name}</span><span>${(adjusted * 100).toFixed(1)}%</span></header>
         <div class="bar"><span style="width:${adjusted * 100}%; background:${domain.color}"></span></div>
+        ${industryText}
       </div>
     `;
   }).join("");
@@ -251,7 +271,22 @@ function renderDashboard() {
 
 function applyLatest(payload) {
   latest = payload;
-  // 막대·헤드라인은 history(2018=100)에서 채운다. 여기선 국가 패널만 사용.
+  const active = payload.domain_weights || {};
+  const industryRows = {};
+  (payload.domains || []).forEach((row) => {
+    industryRows[row.genre] = row.industry_weight ?? row.domain_weight;
+  });
+  domains.forEach((domain) => {
+    if (active[domain.id] != null) domain.weight = Number(active[domain.id]);
+    if (industryRows[domain.id] != null) domain.industryWeight = Number(industryRows[domain.id]);
+  });
+  if (weightProfileSelect) {
+    const activeOption = weightProfileSelect.querySelector('option[value="active"]');
+    const activeLabel = PROFILE_LABELS[activeWeightProfile()] || activeWeightProfile();
+    if (activeOption) activeOption.textContent = `활성: ${activeLabel}`;
+    weightProfileSelect.value = "active";
+  }
+  // 막대·헤드라인은 history(2018=100)에서 채운다. 여기선 국가 패널과 가중치 프로파일을 사용.
 }
 
 function renderLatestPanel() {
@@ -317,7 +352,7 @@ tabs.addEventListener("click", (event) => {
   renderAll();
 });
 
-toggle.addEventListener("change", renderAll);
+weightProfileSelect?.addEventListener("change", renderAll);
 window.addEventListener("resize", drawChart);
 
 function drawLineChart(canvas, labels, series) {
