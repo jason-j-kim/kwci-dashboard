@@ -403,6 +403,21 @@ def _parse_customs_expdlr(xml_text: str) -> float:
     return sum(float(x) for x in re.findall(r"<expDlr>([0-9.]+)</expDlr>", xml_text) if x)
 
 
+def _customs_response_error(xml_text: str) -> str:
+    """data.go.kr 오류 XML을 정상 0달러 응답과 구분한다."""
+    code = re.search(r"<(?:resultCode|returnReasonCode)>(.*?)</(?:resultCode|returnReasonCode)>", xml_text)
+    if code and code.group(1).strip() not in {"", "0", "00", "NORMAL_CODE"}:
+        return code.group(1).strip()
+    msg = re.search(r"<(?:errMsg|returnAuthMsg|resultMsg)>(.*?)</(?:errMsg|returnAuthMsg|resultMsg)>", xml_text)
+    if msg:
+        text = msg.group(1).strip()
+        if text and text.upper() not in {"NORMAL SERVICE.", "NORMAL_CODE", "OK"}:
+            return text
+    if "SERVICE_KEY" in xml_text or "ERROR" in xml_text.upper():
+        return "api_error"
+    return ""
+
+
 def collect_customs_export(sample: bool = False) -> pd.DataFrame:
     """관세청 품목별 국가별 수출입실적 → 분야별 L1 경제(수출액 USD).
 
@@ -418,7 +433,7 @@ def collect_customs_export(sample: bool = False) -> pd.DataFrame:
     rows = []
     for genre, hs_list in config.CUSTOMS_HS_CODES.items():
         for country in config.TARGET_COUNTRIES:
-            total, err = 0.0, ""
+            total, errors, success = 0.0, [], 0
             for hs in hs_list:
                 try:
                     r = requests.get(config.CUSTOMS_EXPORT_URL, params={
@@ -427,16 +442,27 @@ def collect_customs_export(sample: bool = False) -> pd.DataFrame:
                         "hsSgn": hs, "cntyCd": country,
                     }, timeout=30)
                 except Exception:  # noqa: BLE001
-                    err = "network"
+                    errors.append(f"{hs}:network")
                     continue
                 if r.status_code >= 400:
-                    err = f"http_{r.status_code}"
+                    errors.append(f"{hs}:http_{r.status_code}")
+                    continue
+                api_error = _customs_response_error(r.text)
+                if api_error:
+                    errors.append(f"{hs}:{api_error}")
                     continue
                 total += _parse_customs_expdlr(r.text)
+                success += 1
                 time.sleep(0.08)
-            rows.append({"country": country, "genre": genre, "export_usd": total,
-                         "customs_error": err,
-                         "source": "customs_api" if not err else "customs_api_partial"})
+            if success == 0:
+                export_usd = float("nan")
+                source = "customs_api_error"
+            else:
+                export_usd = total
+                source = "customs_api" if not errors else "customs_api_partial"
+            rows.append({"country": country, "genre": genre, "export_usd": export_usd,
+                         "customs_error": ";".join(errors),
+                         "source": source})
     if not rows:
         return _sample_customs_export()
     return pd.DataFrame(rows)

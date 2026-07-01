@@ -11,10 +11,19 @@ from . import config
 
 
 def minmax(series: pd.Series) -> pd.Series:
-    mn, mx = series.min(), series.max()
+    valid = series.dropna()
+    if valid.empty:
+        return pd.Series([math.nan] * len(series), index=series.index)
+    mn, mx = valid.min(), valid.max()
     if pd.isna(mn) or pd.isna(mx) or mx == mn:
-        return pd.Series([50.0] * len(series), index=series.index)
+        out = pd.Series([math.nan] * len(series), index=series.index)
+        out.loc[series.notna()] = 50.0
+        return out
     return (series - mn) / (mx - mn) * 100
+
+
+def _is_missing(value) -> bool:
+    return pd.isna(value)
 
 
 def build_panel(survey, youtube, trends, kf, export=None):
@@ -92,6 +101,19 @@ def score_panel(panel):
     L1(경제)은 수집기 미구현 → 도메인 층위가중을 L2·L3로 재정규화(프레임워크 결측규칙).
     """
     s = panel.copy()
+    if "youtube_source" in s.columns:
+        yerr = s["youtube_source"].astype(str).str.contains("error", case=False, na=False)
+        s.loc[yerr, "youtube_views"] = math.nan
+    if "trends_source" in s.columns:
+        terr = s["trends_source"].astype(str).str.contains("error", case=False, na=False)
+        s.loc[terr, "trends_interest"] = math.nan
+    if "kf_source" in s.columns:
+        kerr = s["kf_source"].astype(str).str.contains("error", case=False, na=False)
+        s.loc[kerr, "kf_count"] = math.nan
+    if "customs_source" in s.columns:
+        cerr = s["customs_source"].astype(str).str.contains("error", case=False, na=False)
+        s.loc[cerr, "export_usd"] = math.nan
+
     # L3 내부 신호 정규화 (장르별 Min-Max)
     s["survey_norm"] = s.groupby("genre")["survey_score"].transform(minmax)
     s["youtube_norm"] = s.groupby("genre")["youtube_views"].transform(minmax)
@@ -108,7 +130,16 @@ def score_panel(panel):
     rmask = s["country"].isin(config.TRENDS_RESTRICTED)
     s.loc[rmask, "wb"] = b + g
     s.loc[rmask, "wg"] = 0.0
-    s["L3_norm"] = s["wa"] * s["survey_norm"] + s["wb"] * s["youtube_norm"] + s["wg"] * s["trends_norm"]
+
+    def l3_row(r):
+        signals = [("survey_norm", r["wa"]), ("youtube_norm", r["wb"]), ("trends_norm", r["wg"])]
+        present = [(r[col], weight) for col, weight in signals if weight > 0 and not _is_missing(r[col])]
+        total = sum(weight for _, weight in present)
+        if total <= 0:
+            return math.nan
+        return sum(value * weight / total for value, weight in present)
+
+    s["L3_norm"] = s.apply(l3_row, axis=1)
 
     # L1 (경제): 관세청 수출액 → 분야별 Min-Max. 수출 데이터 없는 분야는 NaN(결측).
     if "export_usd" in s.columns:
@@ -122,10 +153,12 @@ def score_panel(panel):
 
     def dsi_row(r):
         present = {}
-        if not (isinstance(r["L1_norm"], float) and math.isnan(r["L1_norm"])):
+        if not _is_missing(r["L1_norm"]):
             present["L1"] = r["L1_norm"]
-        present["L2"] = r["L2_norm"]
-        present["L3"] = r["L3_norm"]
+        if not _is_missing(r["L2_norm"]):
+            present["L2"] = r["L2_norm"]
+        if not _is_missing(r["L3_norm"]):
+            present["L3"] = r["L3_norm"]
         tot = sum(lw[k] for k in present) or 1.0
         return sum(lw[k] / tot * present[k] for k in present)
 
@@ -150,7 +183,8 @@ def domain_summary(scored: pd.DataFrame) -> pd.DataFrame:
     """도메인(분야)별 DSI 평균 — 어떤 분야가 전 세계적으로 강한지."""
     d = scored.groupby("genre", as_index=False).agg(dsi_mean=("dsi", "mean"))
     d["genre_name"] = d["genre"].map(config.GENRE_NAMES_KO)
-    d["domain_weight"] = d["genre"].map(config.GENRE_WEIGHTS)
+    d["domain_weight"] = d["genre"].map(active_weights())
+    d["industry_weight"] = d["genre"].map(config.GENRE_WEIGHTS)
     d["dsi_mean"] = d["dsi_mean"].round(2)
     return d.sort_values("dsi_mean", ascending=False)
 
