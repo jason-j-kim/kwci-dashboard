@@ -1,5 +1,5 @@
 {
-  "date": "2026-09-02",
+  "date": "2026-10-02",
   "framework": "KWCI L1/L2/L3 DSI model",
   "cadence": "quarterly",
   "base_year": 2018,
@@ -48,10 +48,10 @@
         "kfashion": 0.08,
         "ktourism": 0.08
       },
-      "global_mean": 40.21,
+      "global_mean": 36.4,
       "top3": [
-        "AR",
         "VN",
+        "AR",
         "TH"
       ]
     },
@@ -66,11 +66,11 @@
         "kfashion": 0.125,
         "ktourism": 0.125
       },
-      "global_mean": 40.73,
+      "global_mean": 38.3,
       "top3": [
         "VN",
         "AR",
-        "TH"
+        "US"
       ]
     },
     "two_axis_economic": {
@@ -84,11 +84,11 @@
         "kfashion": 0.1701,
         "ktourism": 0.044
       },
-      "global_mean": 43.79,
+      "global_mean": 41.49,
       "top3": [
         "VN",
         "AR",
-        "TH"
+        "US"
       ]
     },
     "two_axis_cultural": {
@@ -102,29 +102,29 @@
         "kfashion": 0.1401,
         "ktourism": 0.056
       },
-      "global_mean": 42.59,
+      "global_mean": 39.79,
       "top3": [
         "VN",
         "AR",
-        "TH"
+        "US"
       ]
     },
     "entropy_ahp": {
       "weights": {
-        "kbeauty": 0.0987,
-        "kfashion": 0.0941,
-        "kfood": 0.0948,
-        "kgame": 0.1437,
-        "kpop": 0.2024,
-        "ktourism": 0.0971,
-        "kvideo": 0.1566,
-        "kwebtoon": 0.1126
+        "kbeauty": 0.1102,
+        "kfashion": 0.0773,
+        "kfood": 0.1014,
+        "kgame": 0.148,
+        "kpop": 0.2398,
+        "ktourism": 0.0862,
+        "kvideo": 0.1336,
+        "kwebtoon": 0.1035
       },
-      "global_mean": 40.01,
+      "global_mean": 35.56,
       "top3": [
-        "AR",
         "VN",
-        "TH"
+        "AR",
+        "MY"
       ]
     }
   },
@@ -132,24 +132,24 @@
     "basis": "entropy_ahp",
     "theta": 0.5,
     "weights": {
-      "kbeauty": 0.0987,
-      "kfashion": 0.0941,
-      "kfood": 0.0948,
-      "kgame": 0.1437,
-      "kpop": 0.2024,
-      "ktourism": 0.0971,
-      "kvideo": 0.1566,
-      "kwebtoon": 0.1126
+      "kbeauty": 0.1102,
+      "kfashion": 0.0773,
+      "kfood": 0.1014,
+      "kgame": 0.148,
+      "kpop": 0.2398,
+      "ktourism": 0.0862,
+      "kvideo": 0.1336,
+      "kwebtoon": 0.1035
     },
     "w_entropy": {
-      "kbeauty": 0.0974,
-      "kfashion": 0.1082,
-      "kfood": 0.0897,
-      "kgame": 0.1274,
-      "kpop": 0.2049,
-      "ktourism": 0.1142,
-      "kvideo": 0.1331,
-      "kwebtoon": 0.1252
+      "kbeauty": 0.1205,
+      "kfashion": 0.0746,
+      "kfood": 0.1028,
+      "kgame": 0.136,
+      "kpop": 0.2795,
+      "ktourism": 0.0923,
+      "kvideo": 0.0872,
+      "kwebtoon": 0.1071
     },
     "note": "데이터기반 동적가중 1단계(외부 연구자 KCIS 제안). w=θ·AHP+(1-θ)·Entropy. AHP=산업규모안(전문가 사전), Entropy=DSI 횡단 구분력. IPCA·MoE(2단계)는 60주 패널 축적 후."
   },
@@ -218,231 +218,231 @@
   "risk_note": "위험도 R(외부 연구자 KCIS 제안 1단계 반영): 현재 쏠림(ENM 기반 concentration)만 실산출. 값↑=특정국 의존↑=위험↑. 조작(주간 조회수 급등·봇)·부정감성(댓글 감성)은 주간 패널·감성분석 연동 후 추가.",
   "formula": "DSI_i=Σ(wL·L_norm); KWCI=Σ(w_i·DSI_i); KWCI_index=KWCI/KWCI_2018×100",
   "global": {
-    "global_index": 42.59,
+    "global_index": 39.79,
     "method": "mean",
-    "global_index_mean": 42.59,
-    "global_index_pop_weighted": 33.77,
+    "global_index_mean": 39.79,
+    "global_index_pop_weighted": 31.14,
     "countries_count": 15,
     "max_country": {
       "country": "VN",
-      "value": 67.53
+      "value": 60.63
     },
     "min_country": {
       "country": "ZA",
-      "value": 20.16
+      "value": 20.32
     }
   },
   "domains": [
     {
       "genre": "kfashion",
-      "dsi_mean": 48.03,
+      "dsi_mean": 47.07,
       "genre_name": "K패션",
       "domain_weight": 0.08
     },
     {
       "genre": "kbeauty",
-      "dsi_mean": 47.53,
+      "dsi_mean": 45.59,
       "genre_name": "K뷰티",
       "domain_weight": 0.1
     },
     {
       "genre": "kfood",
-      "dsi_mean": 45.54,
+      "dsi_mean": 45.27,
       "genre_name": "K푸드",
       "domain_weight": 0.1
     },
     {
-      "genre": "kvideo",
-      "dsi_mean": 42.86,
-      "genre_name": "K영상",
-      "domain_weight": 0.18
-    },
-    {
       "genre": "kgame",
-      "dsi_mean": 39.98,
+      "dsi_mean": 41.38,
       "genre_name": "K게임",
       "domain_weight": 0.16
     },
     {
       "genre": "kwebtoon",
-      "dsi_mean": 39.54,
+      "dsi_mean": 38.96,
       "genre_name": "K웹툰",
       "domain_weight": 0.1
     },
     {
-      "genre": "kpop",
-      "dsi_mean": 33.39,
-      "genre_name": "K팝",
-      "domain_weight": 0.2
+      "genre": "kvideo",
+      "dsi_mean": 38.47,
+      "genre_name": "K영상",
+      "domain_weight": 0.18
     },
     {
       "genre": "ktourism",
-      "dsi_mean": 29.0,
+      "dsi_mean": 31.93,
       "genre_name": "K관광",
       "domain_weight": 0.08
+    },
+    {
+      "genre": "kpop",
+      "dsi_mean": 17.76,
+      "genre_name": "K팝",
+      "domain_weight": 0.2
     }
   ],
   "countries": [
     {
       "country": "VN",
-      "kwci": 67.53,
-      "L2_norm": 60.0,
-      "youtube_views": 364799087,
-      "trends_interest": 23.4,
+      "kwci": 60.63,
+      "L2_norm": 0.0,
+      "youtube_views": 363131608,
+      "trends_interest": 5.4,
       "country_name": "베트남"
     },
     {
       "country": "AR",
-      "kwci": 65.76,
-      "L2_norm": 100.0,
-      "youtube_views": 299922782,
-      "trends_interest": 17.6,
+      "kwci": 55.48,
+      "L2_norm": 0.0,
+      "youtube_views": 197695983,
+      "trends_interest": 5.4,
       "country_name": "아르헨티나"
     },
     {
-      "country": "TH",
-      "kwci": 60.57,
-      "L2_norm": 74.19354838709677,
-      "youtube_views": 180191917,
-      "trends_interest": 21.6,
-      "country_name": "태국"
-    },
-    {
       "country": "US",
-      "kwci": 51.73,
+      "kwci": 52.24,
       "L2_norm": 0.0,
-      "youtube_views": 264492757,
-      "trends_interest": 24.4,
+      "youtube_views": 288842447,
+      "trends_interest": 8.2,
       "country_name": "미국"
     },
     {
-      "country": "FR",
-      "kwci": 49.85,
+      "country": "TH",
+      "kwci": 52.06,
       "L2_norm": 0.0,
-      "youtube_views": 131026538,
-      "trends_interest": 15.5,
+      "youtube_views": 255316446,
+      "trends_interest": 4.9,
+      "country_name": "태국"
+    },
+    {
+      "country": "FR",
+      "kwci": 49.26,
+      "L2_norm": 0.0,
+      "youtube_views": 147261015,
+      "trends_interest": 5.0,
       "country_name": "프랑스"
     },
     {
+      "country": "MY",
+      "kwci": 45.84,
+      "L2_norm": 100.0,
+      "youtube_views": 689432816,
+      "trends_interest": 14.5,
+      "country_name": "말레이시아"
+    },
+    {
       "country": "JP",
-      "kwci": 48.67,
-      "L2_norm": 40.0,
-      "youtube_views": 130502461,
-      "trends_interest": 20.4,
+      "kwci": 42.75,
+      "L2_norm": 0.0,
+      "youtube_views": 185850816,
+      "trends_interest": 2.0,
       "country_name": "일본"
     },
     {
       "country": "AE",
-      "kwci": 44.02,
+      "kwci": 42.43,
       "L2_norm": 0.0,
-      "youtube_views": 521548819,
-      "trends_interest": 19.1,
+      "youtube_views": 577324085,
+      "trends_interest": 8.5,
       "country_name": "UAE"
     },
     {
       "country": "BR",
-      "kwci": 42.36,
-      "L2_norm": 35.483870967741936,
-      "youtube_views": 293010224,
-      "trends_interest": 20.6,
+      "kwci": 34.94,
+      "L2_norm": 0.0,
+      "youtube_views": 240433885,
+      "trends_interest": 6.4,
       "country_name": "브라질"
     },
     {
-      "country": "MY",
-      "kwci": 41.8,
-      "L2_norm": 60.0,
-      "youtube_views": 417874883,
-      "trends_interest": 29.4,
-      "country_name": "말레이시아"
-    },
-    {
-      "country": "CN",
-      "kwci": 34.77,
-      "L2_norm": 100.0,
-      "youtube_views": 0,
-      "trends_interest": 21.2,
-      "country_name": "중국"
-    },
-    {
       "country": "TR",
-      "kwci": 34.66,
+      "kwci": 33.2,
       "L2_norm": 0.0,
-      "youtube_views": 248668289,
-      "trends_interest": 13.8,
+      "youtube_views": 257595301,
+      "trends_interest": 2.8,
       "country_name": "터키"
     },
     {
       "country": "ID",
-      "kwci": 33.92,
-      "L2_norm": 20.0,
-      "youtube_views": 267853658,
-      "trends_interest": 21.5,
+      "kwci": 31.64,
+      "L2_norm": 6.451612903225806,
+      "youtube_views": 302732109,
+      "trends_interest": 6.6,
       "country_name": "인도네시아"
     },
     {
+      "country": "CN",
+      "kwci": 27.4,
+      "L2_norm": 0.0,
+      "youtube_views": 0,
+      "trends_interest": 3.8,
+      "country_name": "중국"
+    },
+    {
       "country": "GB",
-      "kwci": 21.84,
+      "kwci": 25.02,
       "L2_norm": 3.225806451612903,
-      "youtube_views": 205664420,
-      "trends_interest": 18.5,
+      "youtube_views": 299257510,
+      "trends_interest": 10.4,
       "country_name": "영국"
     },
     {
       "country": "IN",
-      "kwci": 21.25,
+      "kwci": 23.61,
       "L2_norm": 0.0,
-      "youtube_views": 464835210,
-      "trends_interest": 15.4,
+      "youtube_views": 624874044,
+      "trends_interest": 5.2,
       "country_name": "인도"
     },
     {
       "country": "ZA",
-      "kwci": 20.16,
-      "L2_norm": 0.0,
-      "youtube_views": 288182027,
-      "trends_interest": 12.4,
+      "kwci": 20.32,
+      "L2_norm": 3.225806451612903,
+      "youtube_views": 434239481,
+      "trends_interest": 5.9,
       "country_name": "남아공"
     }
   ],
   "top": [
     {
       "country": "VN",
-      "kwci": 67.53,
-      "L2_norm": 60.0,
-      "youtube_views": 364799087,
-      "trends_interest": 23.4,
+      "kwci": 60.63,
+      "L2_norm": 0.0,
+      "youtube_views": 363131608,
+      "trends_interest": 5.4,
       "country_name": "베트남"
     },
     {
       "country": "AR",
-      "kwci": 65.76,
-      "L2_norm": 100.0,
-      "youtube_views": 299922782,
-      "trends_interest": 17.6,
+      "kwci": 55.48,
+      "L2_norm": 0.0,
+      "youtube_views": 197695983,
+      "trends_interest": 5.4,
       "country_name": "아르헨티나"
     },
     {
-      "country": "TH",
-      "kwci": 60.57,
-      "L2_norm": 74.19354838709677,
-      "youtube_views": 180191917,
-      "trends_interest": 21.6,
-      "country_name": "태국"
-    },
-    {
       "country": "US",
-      "kwci": 51.73,
+      "kwci": 52.24,
       "L2_norm": 0.0,
-      "youtube_views": 264492757,
-      "trends_interest": 24.4,
+      "youtube_views": 288842447,
+      "trends_interest": 8.2,
       "country_name": "미국"
     },
     {
-      "country": "FR",
-      "kwci": 49.85,
+      "country": "TH",
+      "kwci": 52.06,
       "L2_norm": 0.0,
-      "youtube_views": 131026538,
-      "trends_interest": 15.5,
+      "youtube_views": 255316446,
+      "trends_interest": 4.9,
+      "country_name": "태국"
+    },
+    {
+      "country": "FR",
+      "kwci": 49.26,
+      "L2_norm": 0.0,
+      "youtube_views": 147261015,
+      "trends_interest": 5.0,
       "country_name": "프랑스"
     }
   ],
@@ -454,8 +454,8 @@
       "top_country": "CN",
       "top_share_pct": 9.0,
       "basis": "kofice_survey",
-      "youtube_enm": 9.97,
-      "youtube_top": "ZA 11.9%"
+      "youtube_enm": 7.19,
+      "youtube_top": "IN 17.1%"
     },
     "kfashion": {
       "enm": 14.48,
@@ -464,8 +464,8 @@
       "top_country": "CN",
       "top_share_pct": 9.1,
       "basis": "kofice_survey",
-      "youtube_enm": 11.58,
-      "youtube_top": "AE 10.5%"
+      "youtube_enm": 10.86,
+      "youtube_top": "AE 14.2%"
     },
     "kfood": {
       "enm": 14.48,
@@ -474,8 +474,8 @@
       "top_country": "VN",
       "top_share_pct": 8.9,
       "basis": "kofice_survey",
-      "youtube_enm": 11.55,
-      "youtube_top": "IN 13.9%"
+      "youtube_enm": 11.76,
+      "youtube_top": "IN 15.1%"
     },
     "kgame": {
       "enm": 14.86,
@@ -484,8 +484,8 @@
       "top_country": "VN",
       "top_share_pct": 7.9,
       "basis": "kofice_survey",
-      "youtube_enm": 6.99,
-      "youtube_top": "BR 24.2%"
+      "youtube_enm": 7.64,
+      "youtube_top": "US 19.5%"
     },
     "kpop": {
       "enm": 14.64,
@@ -494,8 +494,8 @@
       "top_country": "TH",
       "top_share_pct": 8.5,
       "basis": "kofice_survey",
-      "youtube_enm": 6.06,
-      "youtube_top": "AE 25.4%"
+      "youtube_enm": 5.18,
+      "youtube_top": "MY 33.1%"
     },
     "ktourism": {
       "enm": 14.67,
@@ -504,8 +504,8 @@
       "top_country": "JP",
       "top_share_pct": 8.7,
       "basis": "kofice_survey",
-      "youtube_enm": 3.62,
-      "youtube_top": "AR 50.6%"
+      "youtube_enm": 12.84,
+      "youtube_top": "GB 11.5%"
     },
     "kvideo": {
       "enm": 14.4,
@@ -514,8 +514,8 @@
       "top_country": "TH",
       "top_share_pct": 8.9,
       "basis": "kofice_survey",
-      "youtube_enm": 7.47,
-      "youtube_top": "VN 18.2%"
+      "youtube_enm": 5.43,
+      "youtube_top": "TR 29.9%"
     },
     "kwebtoon": {
       "enm": 14.71,
@@ -524,8 +524,8 @@
       "top_country": "VN",
       "top_share_pct": 8.5,
       "basis": "kofice_survey",
-      "youtube_enm": 8.8,
-      "youtube_top": "US 19.4%"
+      "youtube_enm": 7.06,
+      "youtube_top": "TH 24.8%"
     }
   },
   "audience_diversification_note": "분야별 국가 구성비의 유효시장수 ENM=1/HHI(값↑=쏠림↓). 1차 기준=KOFICE 해외한류실태조사 국가별 관심(연 1회·안정, 단면 노이즈 없음). youtube_*는 참고용 보조(현재 단면, YouTube API 한계로 노이즈 큼). basis 필드로 출처 표시.",
@@ -533,49 +533,49 @@
     {
       "content_type_id": 12,
       "content_type_name": "관광지",
-      "total_count": 12630,
+      "total_count": 12603,
       "source": "tourapi"
     },
     {
       "content_type_id": 14,
       "content_type_name": "문화시설",
-      "total_count": 2723,
+      "total_count": 2748,
       "source": "tourapi"
     },
     {
       "content_type_id": 15,
       "content_type_name": "축제공연행사",
-      "total_count": 908,
+      "total_count": 901,
       "source": "tourapi"
     },
     {
       "content_type_id": 25,
       "content_type_name": "여행코스",
-      "total_count": 1069,
+      "total_count": 1068,
       "source": "tourapi"
     },
     {
       "content_type_id": 28,
       "content_type_name": "레포츠",
-      "total_count": 3779,
+      "total_count": 3751,
       "source": "tourapi"
     },
     {
       "content_type_id": 32,
       "content_type_name": "숙박",
-      "total_count": 2941,
+      "total_count": 2925,
       "source": "tourapi"
     },
     {
       "content_type_id": 38,
       "content_type_name": "쇼핑",
-      "total_count": 12236,
+      "total_count": 12228,
       "source": "tourapi"
     },
     {
       "content_type_id": 39,
       "content_type_name": "음식점",
-      "total_count": 13501,
+      "total_count": 13404,
       "source": "tourapi"
     }
   ],
@@ -607,16 +607,16 @@
   ],
   "l2_chart_kpop": {
     "US": 0.0,
-    "CN": 10.0,
-    "JP": 4.0,
-    "VN": 6.0,
-    "ID": 2.0,
-    "IN": 0.0,
-    "MY": 6.0,
+    "CN": 0.0,
+    "JP": 0.0,
+    "VN": 0.0,
+    "TH": 0.0,
+    "MY": 2.0,
     "FR": 0.0,
+    "BR": 0.0,
+    "AR": 0.0,
     "AE": 0.0,
-    "TR": 0.0,
-    "ZA": 0.0
+    "TR": 0.0
   },
   "l2_chart_note": "K-pop L2 영향력=Apple Music 국가별 Top50 K-Pop(장르51) 점유율(0~100 정규화). 그외 도메인 L2=KF 한류현황(차트 소스 추가 시 승격). 빌보드 Global·시상식은 글로벌 신호라 크로스섹션 제외."
 }
