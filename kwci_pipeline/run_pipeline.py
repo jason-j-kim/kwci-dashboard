@@ -24,31 +24,56 @@ def run(sample: bool = False) -> int:
     if not (config.KF_API_KEY and config.KF_API_URL):
         print("[kwci] KF_API_KEY/KF_API_URL missing: KF uses sample metrics.")
     if not config.DATA_GO_KR_API_KEY:
-        print("[kwci] DATA_GO_KR_API_KEY missing: 관세청 L1 수출 uses sample metrics.")
+        print("[kwci] DATA_GO_KR_API_KEY missing: 관세청 교차검증·KTO 생략. "
+              "L1 은 UN Comtrade(키 불필요)로 수집한다.")
 
     survey = collectors.load_survey_baseline()
     youtube = collectors.collect_youtube_metrics(sample=youtube_sample)
     trends = collectors.collect_trends(sample=sample)
     kf = collectors.collect_kf_metrics(sample=kf_sample)
+    # ── L1 경제층 ───────────────────────────────────────────────
+    # 1차 경로는 **UN Comtrade** 다. 키가 필요 없고, K팝(HS 852349)까지 덮어
+    # 국가별 L1 커버리지가 0.28 → 0.48 로 올라간다.
+    # 관세청은 키가 있을 때만 교차검증용으로 함께 받는다(지수에는 쓰지 않는다).
+    comtrade = collectors.collect_comtrade_export(sample=sample)
     customs = collectors.collect_customs_export(sample=customs_sample)
     kto = collectors.collect_kto_visitors(sample=customs_sample)
     tourism = collectors.collect_tourism_supply(sample=customs_sample)
     kosis = collectors.collect_kosis_industry(sample=sample or not config.KOSIS_API_KEY)
-    l1_export = pd.concat([customs, kto], ignore_index=True)  # 관세청(식품·패션·뷰티)+KTO(관광)
+    l1_export = pd.concat([comtrade, kto], ignore_index=True)  # Comtrade(K팝·식품·패션·뷰티)+KTO(관광)
 
     # L2 영향력 실측 차트: K-pop 국가별 Apple 차트 점유율(장르51). sample 모드/실패 시 빈 dict → KF현황 폴백.
     try:
-        chart_l2 = {} if sample else processor.collect_kpop_chart_l2()
+        chart_l2 = {}
+        if not sample:
+            # 도메인 전용 L2. 셋 다 API 키가 필요 없다.
+            kpop_apple = processor.collect_kpop_chart_l2()
+            try:
+                kpop_spotify = collectors.collect_spotify_l2()
+            except Exception as exc:  # noqa: BLE001
+                print(f"[kwci] Spotify L2 생략: {exc}")
+                kpop_spotify = {}
+            try:
+                kvideo_netflix = collectors.collect_netflix_l2()
+            except Exception as exc:  # noqa: BLE001
+                print(f"[kwci] Netflix L2 생략: {exc}")
+                kvideo_netflix = {}
+            # K팝은 Apple 점유율을 우선하고 없는 나라만 Spotify 로 메운다
+            kpop = dict(kpop_spotify); kpop.update(kpop_apple)
+            chart_l2 = {k: v for k, v in
+                        {"kpop": kpop, "kvideo": kvideo_netflix}.items() if v}
     except Exception:
         chart_l2 = {}
     if chart_l2:
-        print(f"[kwci] L2 chart (K-pop, Apple): {chart_l2}")
+        print("[kwci] L2 chart: " + ", ".join(
+            f"{g}={len(v)}개국" for g, v in chart_l2.items()))
 
     raw_paths = {
         "survey": collectors.save_raw(survey, "survey_baseline"),
         "youtube": collectors.save_raw(youtube, "youtube_metrics"),
         "trends": collectors.save_raw(trends, "trends_metrics"),
         "kf": collectors.save_raw(kf, "kf_metrics"),
+        "comtrade": collectors.save_raw(comtrade, "comtrade_export"),
         "customs": collectors.save_raw(customs, "customs_export"),
         "kto": collectors.save_raw(kto, "kto_visitors"),
         "tourism": collectors.save_raw(tourism, "tourism_supply"),
